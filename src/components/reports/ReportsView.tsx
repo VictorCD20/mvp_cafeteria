@@ -19,6 +19,8 @@ export const ReportsView = () => {
 
   const totalSales = sales.reduce((acc, s) => acc + s.total, 0);
   const totalExpenses = expenses.reduce((acc, e) => acc + e.total, 0);
+  const ticketSales = sales.filter((s) => !s.isShiftSummary);
+  const ticketTotal = ticketSales.reduce((acc, s) => acc + s.total, 0);
 
   const handleExport = (type: string) => {
     showToast(`Reporte ${type} exportado en CSV/PDF (Simulado)`);
@@ -80,16 +82,16 @@ export const ReportsView = () => {
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">Monto Acumulado:</span>
-              <span className="font-extrabold text-slate-900 dark:text-white">${totalSales.toLocaleString()} MXN</span>
+              <span className="font-extrabold text-slate-900 dark:text-white">${totalSales.toLocaleString('es-MX')} MXN</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">Transacciones Totales:</span>
-              <span className="font-bold text-slate-700 dark:text-slate-300">{sales.length} ticket(s)</span>
+              <span className="font-bold text-slate-700 dark:text-slate-300">{ticketSales.length} ticket(s)</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">Ticket Promedio:</span>
               <span className="font-bold text-slate-700 dark:text-slate-300">
-                ${sales.length > 0 ? Math.round(totalSales / sales.length) : 0} MXN
+                ${ticketSales.length > 0 ? Math.round(ticketTotal / ticketSales.length) : 0} MXN
               </span>
             </div>
           </div>
@@ -108,7 +110,7 @@ export const ReportsView = () => {
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">Gastos Totales:</span>
-              <span className="font-extrabold text-rose-600">${totalExpenses.toLocaleString()} MXN</span>
+              <span className="font-extrabold text-rose-600">${totalExpenses.toLocaleString('es-MX')} MXN</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-slate-500">Comprobantes OCR:</span>

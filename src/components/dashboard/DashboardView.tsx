@@ -32,7 +32,8 @@ export const DashboardView = () => {
   } = useCodia();
 
   // Metrics calculation
-  const totalSalesToday = sales.reduce((acc, s) => acc + s.total, 0);
+  const ticketSales = sales.filter((s) => !s.isShiftSummary);
+  const totalSalesToday = ticketSales.reduce((acc, s) => acc + s.total, 0);
   const totalExpensesToday = expenses.reduce((acc, e) => acc + e.total, 0);
   const netBalance = totalSalesToday - totalExpensesToday;
 
@@ -91,10 +92,10 @@ export const DashboardView = () => {
           </div>
           <div className="mt-3">
             <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
-              ${totalSalesToday.toLocaleString()} <span className="text-xs font-normal text-slate-400">MXN</span>
+              ${totalSalesToday.toLocaleString('es-MX')} <span className="text-xs font-normal text-slate-400">MXN</span>
             </div>
             <div className="text-xs text-slate-500 mt-1 flex items-center space-x-1">
-              <span className="font-semibold text-emerald-600">{sales.length} ventas</span>
+              <span className="font-semibold text-emerald-600">{ticketSales.length} ventas</span>
               <span>registradas</span>
             </div>
           </div>
@@ -112,7 +113,7 @@ export const DashboardView = () => {
           </div>
           <div className="mt-3">
             <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
-              ${totalExpensesToday.toLocaleString()} <span className="text-xs font-normal text-slate-400">MXN</span>
+              ${totalExpensesToday.toLocaleString('es-MX')} <span className="text-xs font-normal text-slate-400">MXN</span>
             </div>
             <div className="text-xs text-slate-500 mt-1">
               <span className="font-semibold text-slate-700 dark:text-slate-300">{expenses.length} comprobantes</span>
@@ -249,7 +250,7 @@ export const DashboardView = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {sales.slice(0, 4).map((sale) => (
+                  {ticketSales.slice(0, 4).map((sale) => (
                     <tr key={sale.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                       <td className="py-3 font-mono font-bold text-blue-600 dark:text-blue-400">
                         {sale.folio}

@@ -15,7 +15,8 @@ import {
   Coffee,
   Sparkles,
   AlertTriangle,
-  Gift
+  Gift,
+  Smartphone
 } from 'lucide-react';
 
 export const Sidebar = () => {
@@ -43,6 +44,7 @@ export const Sidebar = () => {
       badge: rewardsAvailableCount > 0 ? `${rewardsAvailableCount} listo` : undefined,
       badgeColor: 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
     },
+    { id: 'vista_cliente', label: 'Vista del cliente', icon: Smartphone },
     { id: 'asistente', label: 'Asistente CODIA', icon: Bot, isNew: true },
     { id: 'reportes', label: 'Reportes', icon: BarChart3 },
     { id: 'configuracion', label: 'Configuración', icon: Settings }

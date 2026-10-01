@@ -10,6 +10,7 @@ import { InventoryView } from '../components/inventory/InventoryView';
 import { PosView } from '../components/pos/PosView';
 import { FinancesView } from '../components/finances/FinancesView';
 import { LoyaltyView } from '../components/loyalty/LoyaltyView';
+import { CustomerView } from '../components/customer/CustomerView';
 import { BotView } from '../components/bot/BotView';
 import { ReportsView } from '../components/reports/ReportsView';
 import { SettingsView } from '../components/settings/SettingsView';
@@ -37,6 +38,8 @@ function AppContent() {
         return <FinancesView />;
       case 'cliente_consentido':
         return <LoyaltyView />;
+      case 'vista_cliente':
+        return <CustomerView />;
       case 'asistente':
         return <BotView />;
       case 'reportes':

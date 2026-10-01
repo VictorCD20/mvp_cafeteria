@@ -7,3 +7,34 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+# CODIA · MVP Cafetería (demo)
+Prototipo navegable de un sistema de gestión para una cafetería (1 sucursal): POS, inventario con recetas, empleados/pre-nómina, finanzas/OCR, Cliente Consentido (sellos), vista del cliente, bot y reportes. Uso: demo para validar con el cliente. Autor del MVP: Víctor; ajustes de demo: Kevin.
+
+## Stack y estructura
+- Next.js 16 (App Router) + React 19 + TypeScript + Tailwind 4. Sin backend: estado en memoria (`src/context/CodiaContext.tsx`) cargado de `src/data/seedData.ts`; se reinicia al recargar.
+- `src/app/page.tsx` cambia de módulo con `activeTab` (no hay rutas por módulo).
+- `src/components/<modulo>/` vistas · `src/lib/` reglas de negocio puras (promociones, inventario) · `src/types/` modelos.
+
+## Comandos
+- `npm run dev` (http://localhost:3000) · `npx tsc --noEmit` · `npx eslint src` · `npm run build`
+
+## Reglas de dominio / trampas
+- Fechas y "viernes" en hora de México (`America/Mexico_City`), nunca UTC.
+- Sellos: la meta es `stampsGoal`; al llegarla el contador vuelve a 0 y suma `rewardsAvailable`. Ningún cliente semilla debe quedar en meta/meta.
+- Promociones se calculan solo en `src/lib/promotions.ts` (`quoteSale`); el POS y `registerSale` usan la misma función.
+- No se vende si faltan insumos (`src/lib/inventory.ts`). No mutar objetos del estado.
+- Ventas `isShiftSummary` son cortes de días previos: cuentan en finanzas/reportes, no en "ventas del día" ni en ticket promedio.
+- Integraciones (Hikvision, PAC, Google Wallet, IA) son simuladas; decirlo en la demo.
+
+## Forma de trabajar
+- Plan antes de código; un cambio de lógica por vez y volver a probar lo anterior.
+- Rama de trabajo `ajustes-demo`. El push está bloqueado hasta que Kevin apruebe.
+
+## Límites
+- ✅ Siempre: leer, editar en la rama de trabajo, correr tsc/lint/build, probar en el navegador, actualizar MEMORY.md.
+- ⚠️ Preguntar antes: push, deploy, nuevas dependencias, cambiar la forma de los datos semilla o tipos compartidos.
+- 🚫 Nunca: subir claves/tokens o datos personales; tocar el repo o Vercel de Víctor sin permiso.
+
+## Verificación
+`npx tsc --noEmit` sin errores, `npm run build` exitoso y recorrido manual: venta con cliente → sello/descuento → inventario; registro en Vista del cliente → sello → canje → notificación.

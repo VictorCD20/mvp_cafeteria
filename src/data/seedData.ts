@@ -354,7 +354,7 @@ export const initialClients: Client[] = [
     email: 'roberto.g@outlook.com',
     phone: '55 2233 4455',
     qrCode: 'CODIA-CLI-8822-QR',
-    stamps: 8,
+    stamps: 3,
     stampsGoal: 8,
     rewardsAvailable: 1, // ¡Con recompensa lista!
     totalVisits: 24,
@@ -402,7 +402,7 @@ export const initialClients: Client[] = [
     email: 'valeria.sol@hotmail.com',
     phone: '55 5566 7788',
     qrCode: 'CODIA-CLI-8825-QR',
-    stamps: 8,
+    stamps: 5,
     stampsGoal: 8,
     rewardsAvailable: 2, // Recompensa disponible
     totalVisits: 32,
@@ -595,6 +595,42 @@ export const initialSales: Sale[] = [
     clientId: 'cli-7',
     clientName: 'Beatriz Villanueva',
     stampsEarned: 1
+  },
+  {
+    id: 'corte-1',
+    folio: 'CORTE-2026-09-27',
+    timestamp: '2026-09-27 21:00',
+    items: [{ productId: 'corte', productName: 'Corte de caja del día (96 tickets)', price: 4860, quantity: 1 }],
+    subtotal: 4860,
+    discount: 0,
+    total: 4860,
+    paymentMethod: 'tarjeta',
+    stampsEarned: 0,
+    isShiftSummary: true
+  },
+  {
+    id: 'corte-2',
+    folio: 'CORTE-2026-09-28',
+    timestamp: '2026-09-28 21:00',
+    items: [{ productId: 'corte', productName: 'Corte de caja del día (103 tickets)', price: 5240, quantity: 1 }],
+    subtotal: 5240,
+    discount: 0,
+    total: 5240,
+    paymentMethod: 'tarjeta',
+    stampsEarned: 0,
+    isShiftSummary: true
+  },
+  {
+    id: 'corte-3',
+    folio: 'CORTE-2026-09-29',
+    timestamp: '2026-09-29 21:00',
+    items: [{ productId: 'corte', productName: 'Corte de caja del día (99 tickets)', price: 5015, quantity: 1 }],
+    subtotal: 5015,
+    discount: 0,
+    total: 5015,
+    paymentMethod: 'tarjeta',
+    stampsEarned: 0,
+    isShiftSummary: true
   }
 ];
 

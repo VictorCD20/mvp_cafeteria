@@ -31,6 +31,8 @@ import {
   initialExpenses,
   initialMovements
 } from '../data/seedData';
+import { quoteSale } from '../lib/promotions';
+import { findShortages, requiredIngredients } from '../lib/inventory';
 
 interface CodiaContextType {
   config: SystemConfig;
@@ -66,8 +68,9 @@ interface CodiaContextType {
   sales: Sale[];
   registerSale: (
     items: { product: Product; quantity: number }[],
-    paymentMethod: 'efectivo' | 'tarjeta' | 'wallet_codia',
-    clientId?: string
+    paymentMethod: 'efectivo' | 'tarjeta',
+    clientId?: string,
+    options?: { forceFriday?: boolean }
   ) => { success: boolean; folio: string; message: string };
 
   // Finances & OCR & Invoicing
@@ -79,8 +82,8 @@ interface CodiaContextType {
 
   // Loyalty & Wallet & Promotions
   clients: Client[];
-  addClient: (client: { name: string; email: string; phone: string; avatar?: string }) => void;
-  addStampsToClient: (clientId: string, count: number) => void;
+  addClient: (client: { name: string; email: string; phone: string; avatar?: string }) => Client;
+  addStampsToClient: (clientId: string, count: number, amountSpent?: number) => void;
   redeemReward: (clientId: string) => boolean;
   promotions: Promotion[];
   addPromotion: (promo: Omit<Promotion, 'id'>) => void;
@@ -122,7 +125,7 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
     {
       id: 'bot-1',
       sender: 'bot',
-      text: '¡Hola Laura! Soy tu Asistente Virtual CODIA. Puedo responder preguntas sobre ventas del día, inventario bajo, personal presente o deudas de clientes.',
+      text: '¡Hola Laura! Soy tu Asistente Virtual CODIA. Puedo responder preguntas sobre ventas del día, inventario bajo, retardos y faltas, gastos, clientes con recompensa y promociones.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -282,7 +285,7 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
       setMovements((prev) => [
         {
           id: `mov-${Date.now()}`,
-          timestamp: new Date().toLocaleString(),
+          timestamp: new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),
           ingredientId: id,
           ingredientName: ingName,
           type: diff > 0 ? 'entrada' : 'salida',
@@ -316,91 +319,91 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
   // POS & Sales
   const registerSale = (
     items: { product: Product; quantity: number }[],
-    paymentMethod: 'efectivo' | 'tarjeta' | 'wallet_codia',
-    clientId?: string
+    paymentMethod: 'efectivo' | 'tarjeta',
+    clientId?: string,
+    options: { forceFriday?: boolean } = {}
   ) => {
     if (items.length === 0) {
       return { success: false, folio: '', message: 'El carrito está vacío' };
     }
 
-    const folio = `VTA-${1052 + sales.length}`;
-    const timestamp = new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-    let subtotal = 0;
+    // 1) Validar que alcancen los insumos antes de vender
+    const shortages = findShortages(items, recipes, ingredients);
+    if (shortages.length > 0) {
+      const detail = shortages.map((s) => `${s.ingredientName} (hay ${s.available} ${s.unit}, se necesitan ${s.needed})`).join(', ');
+      showToast(`No hay insumos suficientes: ${detail}`);
+      return { success: false, folio: '', message: `Insumos insuficientes: ${detail}` };
+    }
 
-    const saleItems = items.map((i) => {
-      subtotal += i.product.price * i.quantity;
-      return {
-        productId: i.product.id,
-        productName: i.product.name,
-        price: i.product.price,
-        quantity: i.quantity
-      };
+    const now = new Date();
+    const lastNumber = Math.max(1048, ...sales.map((s) => Number(s.folio.replace('VTA-', '')) || 0));
+    const folio = `VTA-${lastNumber + 1}`;
+    const timestamp = now.toLocaleString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
     });
 
-    // Client handling & stamps
-    let clientName: string | undefined = undefined;
-    let stampsEarned = 0;
+    // 2) Calcular total, descuentos y sellos con las promociones vigentes
+    const clientObj = clientId ? clients.find((c) => c.id === clientId) : undefined;
+    const quote = quoteSale(items, promotions, clientObj, { date: now, forceFriday: options.forceFriday });
 
-    if (clientId) {
-      const clientObj = clients.find((c) => c.id === clientId);
-      if (clientObj) {
-        clientName = clientObj.name;
-        // 1 stamp for visiting/buying
-        stampsEarned = 1;
-        addStampsToClient(clientId, stampsEarned);
-      }
+    const saleItems = items.map((i) => ({
+      productId: i.product.id,
+      productName: i.product.name,
+      price: i.product.price,
+      quantity: i.quantity
+    }));
+
+    if (clientObj) {
+      addStampsToClient(clientObj.id, quote.stamps, quote.total);
     }
 
     const newSale: Sale = {
-      id: `sale-${Date.now()}`,
+      id: `sale-${now.getTime()}`,
       folio,
       timestamp,
       items: saleItems,
-      subtotal,
-      discount: 0,
-      total: subtotal,
+      subtotal: quote.subtotal,
+      discount: quote.discount,
+      total: quote.total,
       paymentMethod,
-      clientId,
-      clientName,
-      stampsEarned
+      clientId: clientObj?.id,
+      clientName: clientObj?.name,
+      stampsEarned: clientObj ? quote.stamps : 0,
+      promotionsApplied: quote.applied.map((a) => `${a.code}: ${a.detail}`)
     };
 
     setSales((prev) => [newSale, ...prev]);
 
-    // Automatic Inventory Deduction via Recipes
+    // 3) Descontar inventario según recetas (sin mutar el estado anterior)
+    const required = requiredIngredients(items, recipes);
     const movementsToAdd: InventoryMovement[] = [];
-    const updatedIngredients = [...ingredients];
-
-    items.forEach(({ product, quantity }) => {
-      const recipe = recipes.find((r) => r.id === product.recipeId || r.productId === product.id);
-      if (recipe) {
-        recipe.items.forEach((rItem) => {
-          const ingIndex = updatedIngredients.findIndex((ing) => ing.id === rItem.ingredientId);
-          if (ingIndex >= 0) {
-            const totalDeduct = rItem.quantity * quantity;
-            updatedIngredients[ingIndex].currentStock = Math.max(0, updatedIngredients[ingIndex].currentStock - totalDeduct);
-
-            movementsToAdd.push({
-              id: `mov-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-              timestamp,
-              ingredientId: rItem.ingredientId,
-              ingredientName: rItem.ingredientName,
-              type: 'salida',
-              quantity: totalDeduct,
-              unit: rItem.unit,
-              reason: `Venta POS ${folio} (${quantity}x ${product.name})`
-            });
-          }
-        });
-      }
+    required.forEach((qty, ingredientId) => {
+      const ing = ingredients.find((i) => i.id === ingredientId);
+      if (!ing) return;
+      movementsToAdd.push({
+        id: `mov-${now.getTime()}-${ingredientId}`,
+        timestamp,
+        ingredientId,
+        ingredientName: ing.name,
+        type: 'salida',
+        quantity: qty,
+        unit: ing.unit,
+        reason: `Venta POS ${folio}`
+      });
     });
-
-    setIngredients(updatedIngredients);
+    setIngredients((prev) =>
+      prev.map((ing) => (required.has(ing.id) ? { ...ing, currentStock: ing.currentStock - (required.get(ing.id) ?? 0) } : ing))
+    );
     if (movementsToAdd.length > 0) {
       setMovements((prev) => [...movementsToAdd, ...prev]);
     }
 
-    showToast(`Venta ${folio} por $${subtotal} MXN registrada y descontada de inventario`);
+    showToast(`Venta ${folio} por $${quote.total} MXN registrada y descontada de inventario`);
     return { success: true, folio, message: `Venta registrada con éxito. Ticket: ${folio}` };
   };
 
@@ -480,6 +483,7 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
   // Clients & Wallet & Promotions
   const addClient = (clientData: { name: string; email: string; phone: string; avatar?: string }) => {
     const code = `CLI-${8820 + clients.length + 1}`;
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
     const newClient: Client = {
       id: `cli-${Date.now()}`,
       code,
@@ -494,13 +498,14 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
       totalVisits: 1,
       totalSpent: 0,
       tier: 'Nuevo',
-      lastVisit: new Date().toISOString().split('T')[0]
+      lastVisit: today
     };
     setClients((prev) => [...prev, newClient]);
     showToast(`Cliente ${newClient.name} agregado a Cliente Consentido`);
+    return newClient;
   };
 
-  const addStampsToClient = (clientId: string, count: number) => {
+  const addStampsToClient = (clientId: string, count: number, amountSpent = 0) => {
     setClients((prev) =>
       prev.map((c) => {
         if (c.id === clientId) {
@@ -518,8 +523,9 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
             stamps: newStamps,
             rewardsAvailable: c.rewardsAvailable + rewardsToAdd,
             totalVisits,
+            totalSpent: c.totalSpent + amountSpent,
             tier,
-            lastVisit: new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+            lastVisit: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' })
           };
         }
         return c;
@@ -528,22 +534,16 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const redeemReward = (clientId: string) => {
-    let success = false;
-    setClients((prev) =>
-      prev.map((c) => {
-        if (c.id === clientId && c.rewardsAvailable > 0) {
-          success = true;
-          return { ...c, rewardsAvailable: c.rewardsAvailable - 1 };
-        }
-        return c;
-      })
-    );
-    if (success) {
-      showToast('Recompensa canjeada con éxito');
-    } else {
+    const client = clients.find((c) => c.id === clientId);
+    if (!client || client.rewardsAvailable <= 0) {
       showToast('El cliente no tiene recompensas disponibles');
+      return false;
     }
-    return success;
+    setClients((prev) =>
+      prev.map((c) => (c.id === clientId ? { ...c, rewardsAvailable: c.rewardsAvailable - 1 } : c))
+    );
+    showToast(`Recompensa canjeada para ${client.name}`);
+    return true;
   };
 
   const addPromotion = (promoData: Omit<Promotion, 'id'>) => {
@@ -569,40 +569,66 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
 
     setBotMessages((prev) => [...prev, userMsg]);
 
-    const lower = userText.toLowerCase();
-    let reply = 'Entendido. ¿En qué más te puedo ayudar sobre el sistema de la cafetería?';
+    const lower = userText
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+    const has = (...words: string[]) => words.some((w) => lower.includes(w));
+    const answers: string[] = [];
     let link: { label: string; tab: string } | undefined = undefined;
+    const empName = (id: string) => employees.find((e) => e.id === id)?.name ?? 'Empleado';
 
-    if (lower.includes('ventas') || lower.includes('ingresos')) {
-      const todayTotal = sales.reduce((acc, s) => acc + s.total, 0);
-      reply = `Las ventas acumuladas registradas en el sistema suman $${todayTotal.toLocaleString()} MXN con un total de ${sales.length} transacciones registradas.`;
+    if (has('vend', 'venta', 'ingreso', 'cobr', 'factur')) {
+      const tickets = sales.filter((s) => !s.isShiftSummary);
+      const ticketTotal = tickets.reduce((acc, s) => acc + s.total, 0);
+      answers.push(`Hoy llevamos $${ticketTotal.toLocaleString('es-MX')} MXN en ${tickets.length} ventas.`);
       link = { label: 'Ir al Punto de Venta (POS)', tab: 'ventas' };
-    } else if (lower.includes('falt') || lower.includes('quien falto') || lower.includes('ausen')) {
+    }
+    if (has('tarde', 'retard', 'llego', 'llegaron', 'puntual')) {
+      const late = attendance.filter((a) => a.status === 'retardo').map((a) => `${empName(a.employeeId)} (${a.checkIn})`);
+      answers.push(late.length > 0 ? `Llegaron tarde: ${late.join(', ')}.` : 'Nadie llegó tarde hoy.');
+      link = link ?? { label: 'Ver Asistencia y Checador', tab: 'empleados' };
+    }
+    if (has('falt', 'ausen', 'vino', 'asistencia')) {
       const absents = attendance
         .filter((a) => a.status === 'ausente' || a.status === 'justificado')
-        .map((a) => {
-          const emp = employees.find((e) => e.id === a.employeeId);
-          return `${emp?.name} (${a.status})`;
-        });
-      reply = absents.length > 0 ? `Personal con ausencia registrado hoy: ${absents.join(', ')}.` : 'No hay faltas reportadas hoy. Todo el personal presente o en horario.';
-      link = { label: 'Ver Asistencia y Checador', tab: 'empleados' };
-    } else if (lower.includes('stock') || lower.includes('bajo') || lower.includes('insumo')) {
-      const lowStock = ingredients.filter((i) => i.currentStock <= i.minStock);
-      if (lowStock.length > 0) {
-        reply = `Alerta de Stock Bajo: Tienes ${lowStock.length} insumos por debajo del mínimo recomendados: ${lowStock.map((l) => `${l.name} (${l.currentStock} ${l.unit})`).join(', ')}.`;
-      } else {
-        reply = 'Todos los insumos se encuentran en niveles óptimos de inventario.';
-      }
-      link = { label: 'Revisar Inventario', tab: 'inventario' };
-    } else if (lower.includes('gasto') || lower.includes('egreso') || lower.includes('comprobante')) {
-      const totalExp = expenses.reduce((acc, e) => acc + e.total, 0);
-      reply = `Los egresos totales registrados ascienden a $${totalExp.toLocaleString()} MXN distribuidos en ${expenses.length} comprobantes.`;
-      link = { label: 'Ver Finanzas & OCR', tab: 'finanzas' };
-    } else if (lower.includes('recompensa') || lower.includes('cliente') || lower.includes('wallet')) {
-      const rewardsCount = clients.filter((c) => c.rewardsAvailable > 0).length;
-      reply = `Actualmente hay ${rewardsCount} clientes con recompensas listas para ser canjeadas en el módulo de Cliente Consentido.`;
-      link = { label: 'Ver Cliente Consentido', tab: 'cliente_consentido' };
+        .map((a) => `${empName(a.employeeId)} (${a.status})`);
+      answers.push(absents.length > 0 ? `Ausencias de hoy: ${absents.join(', ')}.` : 'No hay faltas reportadas hoy.');
+      link = link ?? { label: 'Ver Asistencia y Checador', tab: 'empleados' };
     }
+    if (has('stock', 'bajo', 'insumo', 'inventario', 'agot', 'falta de')) {
+      const lowStock = ingredients.filter((i) => i.currentStock <= i.minStock);
+      answers.push(
+        lowStock.length > 0
+          ? `Insumos por debajo del mínimo: ${lowStock.map((l) => `${l.name} (${l.currentStock} ${l.unit})`).join(', ')}.`
+          : 'Todos los insumos están en niveles óptimos.'
+      );
+      link = link ?? { label: 'Revisar Inventario', tab: 'inventario' };
+    }
+    if (has('gasto', 'egreso', 'comprobante', 'gastamos')) {
+      const totalExp = expenses.reduce((acc, e) => acc + e.total, 0);
+      answers.push(`Egresos registrados: $${totalExp.toLocaleString('es-MX')} MXN en ${expenses.length} comprobantes.`);
+      link = link ?? { label: 'Ver Finanzas & OCR', tab: 'finanzas' };
+    }
+    if (has('recompensa', 'cliente', 'sello', 'wallet', 'tarjeta', 'premio')) {
+      const withRewards = clients.filter((c) => c.rewardsAvailable > 0).map((c) => c.name);
+      answers.push(
+        withRewards.length > 0
+          ? `Hay ${clients.length} clientes registrados; con recompensa lista: ${withRewards.join(', ')}.`
+          : `Hay ${clients.length} clientes registrados y ninguno tiene recompensa pendiente.`
+      );
+      link = link ?? { label: 'Ver Cliente Consentido', tab: 'cliente_consentido' };
+    }
+    if (has('promo', 'descuento', '2x1', 'oferta')) {
+      const active = promotions.filter((p) => p.active).map((p) => `${p.title} (${p.code})`);
+      answers.push(active.length > 0 ? `Promociones activas: ${active.join('; ')}.` : 'No hay promociones activas.');
+      link = link ?? { label: 'Ver Promociones', tab: 'cliente_consentido' };
+    }
+
+    const reply =
+      answers.length > 0
+        ? answers.join(' ')
+        : 'Puedo ayudarte con ventas, retardos y faltas, inventario, gastos, clientes con recompensa y promociones. Prueba: "¿Cuánto vendimos hoy y quién llegó tarde?"';
 
     setTimeout(() => {
       setBotMessages((prev) => [

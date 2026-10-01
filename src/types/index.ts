@@ -96,10 +96,12 @@ export interface Sale {
   subtotal: number;
   discount: number;
   total: number;
-  paymentMethod: 'efectivo' | 'tarjeta' | 'wallet_codia';
+  paymentMethod: 'efectivo' | 'tarjeta';
   clientId?: string;
   clientName?: string;
   stampsEarned?: number;
+  promotionsApplied?: string[];
+  isShiftSummary?: boolean; // corte de caja de días anteriores (solo datos demo)
 }
 
 export interface Expense {

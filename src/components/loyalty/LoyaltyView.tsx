@@ -274,7 +274,7 @@ export const LoyaltyView = () => {
                     <img src={c.avatar} alt={c.name} className="w-8 h-8 rounded-full object-cover" />
                     <div>
                       <div className="text-xs font-bold">{c.name}</div>
-                      <div className="text-[10px] opacity-80">{c.stamps}/8 sellos</div>
+                      <div className="text-[10px] opacity-80">{c.stamps}/{c.stampsGoal} sellos</div>
                     </div>
                   </div>
                   {c.rewardsAvailable > 0 && (

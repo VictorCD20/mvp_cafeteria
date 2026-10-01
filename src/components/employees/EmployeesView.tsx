@@ -367,7 +367,7 @@ export const EmployeesView = () => {
               <div className="text-right bg-blue-50 dark:bg-blue-950/40 p-3 rounded-xl border border-blue-200 dark:border-blue-800">
                 <div className="text-xs text-slate-500 font-semibold uppercase">Total Estimado</div>
                 <div className="text-lg font-black text-blue-600 dark:text-blue-400">
-                  ${prePayrollList.reduce((a, b) => a + b.netTotal, 0).toLocaleString()} MXN
+                  ${prePayrollList.reduce((a, b) => a + b.netTotal, 0).toLocaleString('es-MX')} MXN
                 </div>
               </div>
             </div>
@@ -409,7 +409,7 @@ export const EmployeesView = () => {
                         -${item.deductions} MXN
                       </td>
                       <td className="p-3 text-right font-black text-sm text-slate-900 dark:text-white">
-                        ${item.netTotal.toLocaleString()} MXN
+                        ${item.netTotal.toLocaleString('es-MX')} MXN
                       </td>
                     </tr>
                   ))}

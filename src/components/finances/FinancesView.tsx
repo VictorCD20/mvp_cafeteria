@@ -63,7 +63,7 @@ export const FinancesView = () => {
     e.preventDefault();
     const total = expSubtotal + expTax;
     addExpense({
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' }),
       supplier: expSupplier,
       category: expCategory,
       description: expDesc,
@@ -180,21 +180,21 @@ export const FinancesView = () => {
             <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
               <div className="text-xs font-bold text-slate-400 uppercase">Total Ingresos Ventas</div>
               <div className="text-2xl font-black text-emerald-600 mt-2">
-                ${totalSales.toLocaleString()} <span className="text-xs font-normal text-slate-400">MXN</span>
+                ${totalSales.toLocaleString('es-MX')} <span className="text-xs font-normal text-slate-400">MXN</span>
               </div>
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
               <div className="text-xs font-bold text-slate-400 uppercase">Total Egresos / Gastos</div>
               <div className="text-2xl font-black text-rose-600 mt-2">
-                ${totalExpenses.toLocaleString()} <span className="text-xs font-normal text-slate-400">MXN</span>
+                ${totalExpenses.toLocaleString('es-MX')} <span className="text-xs font-normal text-slate-400">MXN</span>
               </div>
             </div>
 
             <div className="bg-gradient-to-tr from-blue-900 to-indigo-900 text-white p-5 rounded-2xl shadow-md border border-blue-800">
               <div className="text-xs font-bold text-blue-200 uppercase">Balance Operativo Neto</div>
               <div className="text-2xl font-black text-white mt-2">
-                ${netBalance.toLocaleString()} <span className="text-xs font-normal text-blue-200">MXN</span>
+                ${netBalance.toLocaleString('es-MX')} <span className="text-xs font-normal text-blue-200">MXN</span>
               </div>
             </div>
           </div>
@@ -215,7 +215,7 @@ export const FinancesView = () => {
                     <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-slate-300 capitalize">
                       <span>{cat}</span>
                       <span>
-                        ${catTotal.toLocaleString()} MXN ({percent}%)
+                        ${catTotal.toLocaleString('es-MX')} MXN ({percent}%)
                       </span>
                     </div>
                     <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
@@ -288,7 +288,7 @@ export const FinancesView = () => {
                         )}
                       </td>
                       <td className="p-4 text-right font-black text-sm text-slate-900 dark:text-white">
-                        ${exp.total.toLocaleString()} MXN
+                        ${exp.total.toLocaleString('es-MX')} MXN
                       </td>
                     </tr>
                   ))}
@@ -479,7 +479,7 @@ export const FinancesView = () => {
                   className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs"
                 >
                   <option value="">-- Seleccionar Folio Venta --</option>
-                  {sales.map((s) => (
+                  {sales.filter((s) => !s.isShiftSummary).map((s) => (
                     <option key={s.id} value={s.folio}>
                       {s.folio} - Total ${s.total} MXN ({s.timestamp})
                     </option>

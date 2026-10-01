@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
 import { Product, CartItem } from '../../types';
 import { Modal } from '../ui/Modal';
+import { quoteSale, isFridayInMexico } from '../../lib/promotions';
 import {
   ShoppingCart,
   Plus,
@@ -11,7 +12,6 @@ import {
   Trash2,
   CreditCard,
   Banknote,
-  Wallet,
   User,
   CheckCircle,
   Receipt,
@@ -22,18 +22,21 @@ import {
 } from 'lucide-react';
 
 export const PosView = () => {
-  const { products, clients, registerSale, sales } = useCodia();
+  const { products, clients, registerSale, sales, promotions } = useCodia();
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('todos');
   const [search, setSearch] = useState('');
   const [selectedClientId, setSelectedClientId] = useState<string>('');
-  const [paymentMethod, setPaymentMethod] = useState<'efectivo' | 'tarjeta' | 'wallet_codia'>('tarjeta');
+  const [paymentMethod, setPaymentMethod] = useState<'efectivo' | 'tarjeta'>('tarjeta');
+  const [simulateFriday, setSimulateFriday] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // Receipt modal after sale
   const [lastSaleFolio, setLastSaleFolio] = useState<string | null>(null);
 
   const addToCart = (product: Product) => {
+    setCheckoutError(null);
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
@@ -63,14 +66,19 @@ export const PosView = () => {
     );
   };
 
-  const cartSubtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+  const selectedClient = clients.find((c) => c.id === selectedClientId);
+  const quote = quoteSale(cart, promotions, selectedClient, { forceFriday: simulateFriday });
+  const isFridayToday = isFridayInMexico();
 
   const handleCheckout = () => {
-    const result = registerSale(cart, paymentMethod, selectedClientId || undefined);
+    const result = registerSale(cart, paymentMethod, selectedClientId || undefined, { forceFriday: simulateFriday });
     if (result.success) {
+      setCheckoutError(null);
       setLastSaleFolio(result.folio);
       setCart([]);
       setSelectedClientId('');
+    } else {
+      setCheckoutError(result.message);
     }
   };
 
@@ -252,7 +260,7 @@ export const PosView = () => {
                 <option value="">-- Cliente Mostrador (General) --</option>
                 {clients.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name} ({c.stamps}/8 sellos)
+                    {c.name} ({c.stamps}/{c.stampsGoal} sellos)
                   </option>
                 ))}
               </select>
@@ -263,7 +271,7 @@ export const PosView = () => {
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Forma de Pago
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('tarjeta')}
@@ -288,28 +296,58 @@ export const PosView = () => {
                   <Banknote className="w-4 h-4 mb-1" />
                   <span>Efectivo</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('wallet_codia')}
-                  className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center justify-center transition ${
-                    paymentMethod === 'wallet_codia'
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                  }`}
-                >
-                  <Wallet className="w-4 h-4 mb-1" />
-                  <span>Wallet</span>
-                </button>
               </div>
             </div>
 
+            {/* Promociones de la venta */}
+            <label className="flex items-center space-x-2 text-[11px] text-slate-500 dark:text-slate-400 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={simulateFriday || isFridayToday}
+                disabled={isFridayToday}
+                onChange={(e) => setSimulateFriday(e.target.checked)}
+                className="accent-purple-600"
+              />
+              <span>{isFridayToday ? 'Hoy es viernes: doble sello activo' : 'Simular viernes (demo de doble sello)'}</span>
+            </label>
+
+            {quote.applied.length > 0 && (
+              <div className="space-y-1 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-xl p-2.5">
+                {quote.applied.map((a) => (
+                  <div key={a.code + a.detail} className="flex justify-between text-[11px] text-purple-700 dark:text-purple-300">
+                    <span className="font-bold">{a.code}</span>
+                    <span>{a.detail}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Total & Confirm Button */}
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-xs text-slate-500 font-bold uppercase">Total a Cobrar</span>
-              <span className="text-2xl font-black text-slate-900 dark:text-white">
-                ${cartSubtotal} <span className="text-xs text-slate-400">MXN</span>
-              </span>
+            <div className="pt-2 space-y-1">
+              {quote.discount > 0 && (
+                <div className="flex justify-between text-xs text-slate-500">
+                  <span>Subtotal ${quote.subtotal} · Descuento</span>
+                  <span className="font-bold text-emerald-600">-${quote.discount}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-500 font-bold uppercase">Total a Cobrar</span>
+                <span className="text-2xl font-black text-slate-900 dark:text-white">
+                  ${quote.total} <span className="text-xs text-slate-400">MXN</span>
+                </span>
+              </div>
+              {selectedClient && (
+                <div className="text-[11px] text-purple-600 dark:text-purple-300 text-right">
+                  {selectedClient.name} sumará {quote.stamps} sello{quote.stamps > 1 ? 's' : ''}
+                </div>
+              )}
             </div>
+
+            {checkoutError && (
+              <div role="alert" className="text-[11px] text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl p-2.5">
+                {checkoutError}
+              </div>
+            )}
 
             <button
               onClick={handleCheckout}
@@ -345,6 +383,13 @@ export const PosView = () => {
               ))}
             </div>
 
+            {lastSaleObj.discount > 0 && (
+              <div className="flex justify-between text-emerald-600">
+                <span>Descuento ({(lastSaleObj.promotionsApplied ?? []).filter((p) => p.includes('-$')).map((p) => p.split(':')[0]).join(', ')})</span>
+                <span className="font-bold">-${lastSaleObj.discount} MXN</span>
+              </div>
+            )}
+
             <div className="border-t border-dashed border-slate-300 dark:border-slate-700 pt-2 flex justify-between text-sm font-extrabold text-slate-900 dark:text-white">
               <span>TOTAL</span>
               <span>${lastSaleObj.total} MXN</span>
@@ -354,7 +399,7 @@ export const PosView = () => {
               <div className="bg-purple-50 dark:bg-purple-950/40 p-2.5 rounded-xl border border-purple-200 dark:border-purple-800 text-[11px] font-sans text-purple-700 dark:text-purple-300">
                 <span className="font-bold">Cliente Consentido:</span> {lastSaleObj.clientName}
                 <br />
-                <span>+1 Sello agregado a su Wallet digital</span>
+                <span>+{lastSaleObj.stampsEarned ?? 1} sello{(lastSaleObj.stampsEarned ?? 1) > 1 ? 's' : ''} agregado{(lastSaleObj.stampsEarned ?? 1) > 1 ? 's' : ''} a su tarjeta digital</span>
               </div>
             )}
 
