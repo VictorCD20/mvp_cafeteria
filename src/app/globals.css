@@ -1,8 +1,64 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* "dark:" solo aplica si existe la clase .dark (ya no depende del modo oscuro del sistema operativo). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Paleta "Latte suave" de CODIA.
+ * En lugar de cambiar cientos de clases, se redefinen las escalas que usa la app:
+ *  - slate  -> neutros crema/café (fondos, bordes y textos)
+ *  - blue / indigo -> caramelo suave (acción principal)
+ *  - purple -> cacao rosado (Cliente Consentido)
+ * Verde, ámbar y rojo se quedan como colores de estado (puntual, retardo, ausente).
+ */
+@theme {
+  --color-slate-50: #fbf8f3;
+  --color-slate-100: #f5efe6;
+  --color-slate-200: #ebe2d5;
+  --color-slate-300: #dccfbd;
+  --color-slate-400: #a89884;
+  --color-slate-500: #7a6a5a;
+  --color-slate-600: #625446;
+  --color-slate-700: #4d4136;
+  --color-slate-800: #3a3029;
+  --color-slate-900: #2b231c;
+  --color-slate-950: #1d1712;
+
+  --color-blue-50: #fbf4ec;
+  --color-blue-100: #f5e6d4;
+  --color-blue-200: #ebcfae;
+  --color-blue-300: #dfb488;
+  --color-blue-400: #cf9a68;
+  --color-blue-500: #b97f4f;
+  --color-blue-600: #a0683f;
+  --color-blue-700: #855533;
+  --color-blue-800: #6a4429;
+  --color-blue-900: #4f331f;
+  --color-blue-950: #342115;
+
+  --color-indigo-50: #fbf5ee;
+  --color-indigo-100: #f3e7d8;
+  --color-indigo-200: #e6cfb4;
+  --color-indigo-300: #d5b38d;
+  --color-indigo-400: #c19870;
+  --color-indigo-500: #a97f58;
+  --color-indigo-600: #8f6847;
+  --color-indigo-700: #74543a;
+  --color-indigo-800: #5a412e;
+  --color-indigo-900: #412f21;
+  --color-indigo-950: #2a1e15;
+
+  --color-purple-50: #f9f1ee;
+  --color-purple-100: #f1e1db;
+  --color-purple-200: #e3c4b9;
+  --color-purple-300: #cfa190;
+  --color-purple-400: #b98371;
+  --color-purple-500: #a06b5b;
+  --color-purple-600: #87574a;
+  --color-purple-700: #6e463c;
+  --color-purple-800: #553730;
+  --color-purple-900: #3e2924;
+  --color-purple-950: #281a17;
 }
 
 @theme inline {
@@ -12,15 +68,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #fbf8f3;
+  --foreground: #2b231c;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }

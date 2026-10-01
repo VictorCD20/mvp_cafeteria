@@ -76,7 +76,7 @@ export const BotView = () => {
                   className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                     isUser
                       ? 'bg-blue-600 text-white'
-                      : 'bg-indigo-950 text-indigo-400 border border-indigo-800'
+                      : 'bg-blue-100 text-blue-700 border border-blue-200'
                   }`}
                 >
                   {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}

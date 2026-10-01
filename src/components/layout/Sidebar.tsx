@@ -27,9 +27,9 @@ interface NavItem {
 }
 
 const badgeTones = {
-  amber: 'bg-amber-500/15 text-amber-400',
-  emerald: 'bg-emerald-500/15 text-emerald-400',
-  blue: 'bg-blue-500/20 text-blue-300'
+  amber: 'bg-amber-100 text-amber-700',
+  emerald: 'bg-emerald-100 text-emerald-700',
+  blue: 'bg-blue-100 text-blue-700'
 };
 
 export const Sidebar = () => {
@@ -92,16 +92,16 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="w-[17rem] bg-slate-900 text-slate-300 flex flex-col shrink-0 h-screen border-r border-slate-800">
+    <aside className="w-[17rem] bg-slate-100 text-slate-600 flex flex-col shrink-0 h-screen border-r border-slate-200">
       {/* Marca */}
-      <div className="px-5 h-16 border-b border-slate-800 flex items-center gap-3 shrink-0">
+      <div className="px-5 h-16 border-b border-slate-200 flex items-center gap-3 shrink-0">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white">
           <Coffee className="w-5 h-5" />
         </div>
         <div className="leading-tight">
-          <div className="font-bold text-white text-sm tracking-wide flex items-center gap-1.5">
+          <div className="font-bold text-slate-900 text-sm tracking-wide flex items-center gap-1.5">
             <span>CODIA</span>
-            <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-mono">POS</span>
+            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-mono">POS</span>
           </div>
           <div className="text-[11px] text-slate-500">Gestión de cafetería</div>
         </div>
@@ -122,18 +122,18 @@ export const Sidebar = () => {
                     onClick={() => handleSelectTab(item.id)}
                     aria-current={isActive ? 'page' : undefined}
                     className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      isActive ? 'bg-blue-600 text-white font-medium' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+                      isActive ? 'bg-white text-blue-800 font-medium shadow-sm ring-1 ring-slate-200' : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
                     }`}
                   >
                     <span className="flex items-center gap-3 min-w-0">
-                      <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                      <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
                       <span className="truncate">{item.label}</span>
                     </span>
                     {item.badge && (
                       <span
                         title={item.badgeTitle}
                         className={`text-[10px] min-w-5 text-center px-1.5 py-0.5 rounded-full font-semibold ${
-                          isActive ? 'bg-white/20 text-white' : badgeTones[item.badgeTone ?? 'blue']
+                          isActive ? 'bg-blue-100 text-blue-700' : badgeTones[item.badgeTone ?? 'blue']
                         }`}
                       >
                         {item.badge}
@@ -148,7 +148,7 @@ export const Sidebar = () => {
       </nav>
 
       {/* Usuario activo */}
-      <div className="p-4 border-t border-slate-800 flex items-center gap-3 shrink-0">
+      <div className="p-4 border-t border-slate-200 flex items-center gap-3 shrink-0">
         <div className="relative shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -156,10 +156,10 @@ export const Sidebar = () => {
             alt="Laura Méndez"
             className="w-9 h-9 rounded-full object-cover"
           />
-          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-slate-900" />
+          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-slate-100" />
         </div>
         <div className="min-w-0 leading-tight">
-          <div className="text-sm font-medium text-white truncate">Laura Méndez</div>
+          <div className="text-sm font-medium text-slate-900 truncate">Laura Méndez</div>
           <div className="text-[11px] text-slate-500 truncate">Administradora · v0.1 demo</div>
         </div>
       </div>

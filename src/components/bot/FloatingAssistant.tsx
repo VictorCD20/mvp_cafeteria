@@ -57,7 +57,7 @@ export const FloatingAssistant = () => {
         <div
           role="dialog"
           aria-label="Asistente CODIA"
-          className={`fixed bottom-24 ${side} z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[480px] max-h-[calc(100vh-8rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200`}
+          className={`fixed bottom-24 ${side} z-40 w-[360px] max-w-[calc(100vw-2rem)] h-[480px] max-h-[calc(100vh-11rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200`}
         >
           {/* Encabezado */}
           <div className="flex items-center justify-between gap-2 px-4 h-14 border-b border-slate-200 dark:border-slate-800 shrink-0">
@@ -169,7 +169,7 @@ export const FloatingAssistant = () => {
         aria-expanded={open}
         aria-label={open ? 'Cerrar el asistente' : 'Abrir el asistente CODIA'}
         title="Asistente CODIA"
-        className={`fixed bottom-6 ${side} z-50 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-lg shadow-blue-600/30 flex items-center justify-center hover:scale-105 transition-transform`}
+        className={`fixed bottom-6 ${side} z-40 w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-lg shadow-blue-600/30 flex items-center justify-center hover:scale-105 transition-transform`}
       >
         {open ? <X className="w-6 h-6" /> : <Bot className="w-6 h-6" />}
       </button>

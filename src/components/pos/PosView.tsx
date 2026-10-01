@@ -238,8 +238,8 @@ export const PosView = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-slate-400 text-xs">
-                <ShoppingCart className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+              <div className="text-center py-6 text-slate-400 text-xs">
+                <ShoppingCart className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
                 El carrito está vacío. Haz clic en una bebida del menú para iniciar la orden.
               </div>
             )}

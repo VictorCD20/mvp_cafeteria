@@ -191,10 +191,10 @@ export const FinancesView = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-tr from-blue-900 to-indigo-900 text-white p-5 rounded-2xl shadow-md border border-blue-800">
-              <div className="text-xs font-bold text-blue-200 uppercase">Balance Operativo Neto</div>
-              <div className="text-2xl font-black text-white mt-2">
-                ${netBalance.toLocaleString('es-MX')} <span className="text-xs font-normal text-blue-200">MXN</span>
+            <div className="bg-blue-50 p-5 rounded-2xl border border-blue-200">
+              <div className="text-xs font-bold text-blue-700 uppercase">Balance Operativo Neto</div>
+              <div className="text-2xl font-black text-blue-900 mt-2">
+                ${netBalance.toLocaleString('es-MX')} <span className="text-xs font-normal text-blue-700">MXN</span>
               </div>
             </div>
           </div>
@@ -302,14 +302,14 @@ export const FinancesView = () => {
       {/* TAB 3: OCR DIGITALIZACIÓN DE COMPROBANTES */}
       {activeSubTab === 'ocr' && (
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-2xl text-white border border-slate-800 shadow-xl space-y-4">
+          <div className="bg-white p-6 rounded-2xl text-slate-900 border border-slate-200 space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-purple-500/20 text-purple-400 rounded-xl border border-purple-500/30">
+              <div className="p-3 bg-purple-100 text-purple-600 rounded-xl border border-purple-200">
                 <Scan className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="text-lg font-bold">Escáner OCR para Tickets & Comprobantes</h3>
-                <p className="text-xs text-slate-300">
+                <p className="text-xs text-slate-500">
                   Sube una foto o selecciona un ticket mock de muestra para extraer automáticamente proveedor, fecha y montos.
                 </p>
               </div>
@@ -327,14 +327,14 @@ export const FinancesView = () => {
               <button
                 onClick={() => handleRunOcrScan('ticket_leche')}
                 disabled={isScanning}
-                className="bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-700 transition"
+                className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs px-4 py-2.5 rounded-xl border border-purple-200 transition"
               >
                 Simular Ticket Lácteos
               </button>
               <button
                 onClick={() => handleRunOcrScan('ticket_mantenimiento')}
                 disabled={isScanning}
-                className="bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-700 transition"
+                className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs px-4 py-2.5 rounded-xl border border-purple-200 transition"
               >
                 Simular Ticket Mantenimiento
               </button>

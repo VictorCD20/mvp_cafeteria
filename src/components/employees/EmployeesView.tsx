@@ -231,25 +231,25 @@ export const EmployeesView = () => {
       {activeSubTab === 'asistencia' && (
         <div className="space-y-6">
           {/* Hikvision Simulator Card */}
-          <div className="bg-gradient-to-r from-slate-900 to-blue-950 p-6 rounded-2xl text-white border border-slate-800 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="bg-white p-6 rounded-2xl text-slate-900 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0">
                 <Clock className="w-6 h-6" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
+                <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
                   Checador Biométrico Hikvision Simulado
                 </div>
-                <h3 className="text-base font-extrabold text-white mt-0.5">
+                <h3 className="text-base font-extrabold text-slate-900 mt-0.5">
                   DS-K1T804AM Terminal Biométrica IP
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   Simula la captura automática de entrada / salida de empleados para pruebas.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-400 text-xs font-bold shrink-0">
+            <div className="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-emerald-700 text-xs font-bold shrink-0">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Conexión IP OK (192.168.1.120)</span>
             </div>

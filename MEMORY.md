@@ -1,7 +1,7 @@
 # MEMORY · MVP Cafetería
 
 ## Estado actual (2026-10-01)
-- Demo funcional en memoria (sin base de datos). Rama local `ajustes-demo`, sin subir.
+- Demo funcional en memoria (sin base de datos). Cambios subidos a `main` el 2026-10-01 (aprobado por Kevin) y publicados en Vercel.
 
 ## Decisiones (y por qué)
 - Promociones reales en el POS (`quoteSale`): para que el 2x1/doble sello no sea solo visual.
@@ -15,6 +15,8 @@
 - Cada módulo abre arriba; el chat del bot hace scroll solo dentro de su caja.
 - Asistente flotante (mini chat) abajo a la derecha, comparte conversación con la sección; en POS se mueve a la izquierda para no tapar "Confirmar venta". Avisos (toasts) movidos arriba a la derecha.
 - POS: el cobro (total + confirmar) queda fijo abajo del ticket; solo la lista de productos hace scroll.
+
+- Paleta "Latte suave" (rama `paleta-latte`, sin subir): modo claro forzado; en `globals.css` se redefinen slate→crema, blue/indigo→caramelo, purple→cacao. Estados (verde/ámbar/rojo) intactos. Menú lateral crema. Tarjeta Wallet y celular quedan en chocolate oscuro a propósito.
 
 ## Ideas pendientes (NO implementar hasta que Kevin decida)
 - Roles: Administrador (dueña, ve todo desde celular/compu: finanzas, OCR, promociones, checador/horarios, reportes) y Caja/empleados (computadora del local: ventas, corte, registrar clientes y sellos; sin bot ni finanzas). Real con Supabase RLS. Por definir: PIN por empleado vs cuenta compartida, flujo mesero→cajero, corte de caja.

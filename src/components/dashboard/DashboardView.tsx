@@ -233,19 +233,19 @@ export const DashboardView = () => {
           </div>
         </SectionCard>
 
-        <section className="bg-gradient-to-br from-purple-900 to-indigo-900 text-white p-6 rounded-2xl border border-purple-800 flex flex-col">
-          <div className="flex items-center gap-2 text-purple-200 text-xs font-semibold uppercase tracking-wide">
+        <section className="bg-purple-50 border border-purple-200 p-6 rounded-2xl flex flex-col">
+          <div className="flex items-center gap-2 text-purple-600 text-xs font-semibold uppercase tracking-wide">
             <Heart className="w-4 h-4" />
             <span>Cliente Consentido</span>
           </div>
-          <h2 className="text-lg font-semibold mt-3">Fidelización de clientes</h2>
-          <p className="text-sm text-purple-200 mt-2 leading-relaxed">
+          <h2 className="text-lg font-semibold text-purple-900 mt-3">Fidelización de clientes</h2>
+          <p className="text-sm text-purple-700 mt-2 leading-relaxed">
             {clients.length} clientes registrados en la wallet simulada.
           </p>
           <div className="flex-1" />
           <button
             onClick={() => setActiveTab('cliente_consentido')}
-            className="mt-6 w-full bg-white text-purple-900 hover:bg-purple-50 text-xs font-semibold py-2.5 rounded-lg transition-colors"
+            className="mt-6 w-full bg-purple-600 text-white hover:bg-purple-700 text-xs font-semibold py-2.5 rounded-lg transition-colors"
           >
             Abrir Wallet y tarjetas
           </button>
