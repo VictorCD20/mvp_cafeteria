@@ -30,10 +30,14 @@ export const EmployeesView = () => {
     registerCheckOut,
     justifyAbsence,
     getPrePayroll,
-    config
+    config,
+    subTab,
+    setSubTab
   } = useCodia();
 
-  const [activeSubTab, setActiveSubTab] = useState<'personal' | 'asistencia' | 'prenomina'>('personal');
+  const activeSubTab: 'personal' | 'asistencia' | 'prenomina' =
+    subTab === 'asistencia' || subTab === 'prenomina' ? subTab : 'personal';
+  const setActiveSubTab = (tab: 'personal' | 'asistencia' | 'prenomina') => setSubTab(tab);
   const [search, setSearch] = useState('');
 
   // Modal states

@@ -52,7 +52,11 @@ const promoForClient = (promo: Promotion, client: Client) => {
   return false;
 };
 
-export const CustomerView = () => {
+interface CustomerViewProps {
+  isStandalonePublic?: boolean;
+}
+
+export const CustomerView: React.FC<CustomerViewProps> = ({ isStandalonePublic = false }) => {
   const { clients, promotions, addClient, addStampsToClient, redeemReward, config } = useCodia();
 
   const [screen, setScreen] = useState<PhoneScreen>('poster');
@@ -99,14 +103,16 @@ export const CustomerView = () => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      <PageHeader
-        icon={<Smartphone className="w-6 h-6 text-purple-500" />}
-        title="Vista del cliente"
-        description="Así lo vive el cliente en su celular: escanea el QR del mostrador, se registra y guarda su tarjeta. A la derecha, lo que hace el cajero."
-      />
+    <div className="space-y-8 animate-in fade-in duration-300 w-full">
+      {!isStandalonePublic && (
+        <PageHeader
+          icon={<Smartphone className="w-6 h-6 text-purple-500" />}
+          title="Vista del cliente"
+          description="Así lo vive el cliente en su celular: escanea el QR del mostrador, se registra y guarda su tarjeta. A la derecha, lo que hace el cajero."
+        />
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <div className={isStandalonePublic ? 'flex justify-center' : 'grid grid-cols-1 lg:grid-cols-2 gap-8 items-start'}>
         {/* CELULAR DEL CLIENTE */}
         <div className="flex justify-center">
           <div className="w-[320px] rounded-[2.5rem] border-[10px] border-slate-800 bg-slate-950 shadow-2xl overflow-hidden">
@@ -264,95 +270,97 @@ export const CustomerView = () => {
           </div>
         </div>
 
-        {/* PANEL DE CAJA */}
-        <div className="space-y-5">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-              <UserPlus className="w-4 h-4 text-purple-500" />
-              <span>Ver la tarjeta de un cliente</span>
-            </h3>
-            <select
-              value={clientId}
-              onChange={(e) => openExisting(e.target.value)}
-              aria-label="Seleccionar cliente"
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white"
-            >
-              <option value="">-- Nuevo cliente (pantalla del QR) --</option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.stamps}/{c.stampsGoal} sellos)
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* PANEL DE CAJA (solo en la administración) */}
+        {!isStandalonePublic && (
+          <div className="space-y-5">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <UserPlus className="w-4 h-4 text-purple-500" />
+                <span>Ver la tarjeta de un cliente</span>
+              </h3>
+              <select
+                value={clientId}
+                onChange={(e) => openExisting(e.target.value)}
+                aria-label="Seleccionar cliente"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white"
+              >
+                <option value="">-- Nuevo cliente (pantalla del QR) --</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.stamps}/{c.stampsGoal} sellos)
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-              <Store className="w-4 h-4 text-blue-500" />
-              <span>Caja (cajero)</span>
-            </h3>
-            {!client ? (
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Registra un cliente en el celular o elige uno arriba para escanear su tarjeta.
-              </p>
-            ) : (
-              <>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <Store className="w-4 h-4 text-blue-500" />
+                <span>Caja (cajero)</span>
+              </h3>
+              {!client ? (
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Cliente: <span className="font-bold text-slate-800 dark:text-slate-200">{client.name}</span> · {client.totalVisits} visitas
+                  Registra un cliente en el celular o elige uno arriba para escanear su tarjeta.
                 </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => addStampsToClient(client.id, 1)}
-                    className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5"
-                  >
-                    <ScanLine className="w-4 h-4" />
-                    <span>Escanear y sumar sello</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => redeemReward(client.id)}
-                    disabled={client.rewardsAvailable === 0}
-                    className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5"
-                  >
-                    <Gift className="w-4 h-4" />
-                    <span>Canjear recompensa</span>
-                  </button>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  En una venta real, el sello también se suma desde el Punto de Venta al elegir al cliente.
-                </p>
-              </>
-            )}
-          </div>
+              ) : (
+                <>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Cliente: <span className="font-bold text-slate-800 dark:text-slate-200">{client.name}</span> · {client.totalVisits} visitas
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => addStampsToClient(client.id, 1)}
+                      className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5"
+                    >
+                      <ScanLine className="w-4 h-4" />
+                      <span>Escanear y sumar sello</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => redeemReward(client.id)}
+                      disabled={client.rewardsAvailable === 0}
+                      className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5"
+                    >
+                      <Gift className="w-4 h-4" />
+                      <span>Canjear recompensa</span>
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    En una venta real, el sello también se suma desde el Punto de Venta al elegir al cliente.
+                  </p>
+                </>
+              )}
+            </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-              <Bell className="w-4 h-4 text-amber-500" />
-              <span>Enviar promoción al celular</span>
-            </h3>
-            <select
-              value={promoToSend}
-              onChange={(e) => setPromoToSend(e.target.value)}
-              aria-label="Seleccionar promoción"
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white"
-            >
-              <option value="">-- Elige una promoción activa --</option>
-              {promotions.filter((p) => p.active).map((p) => (
-                <option key={p.id} value={p.id}>{p.title}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={sendPromotion}
-              disabled={!client || !promoToSend}
-              className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-amber-950 font-bold py-2.5 rounded-xl text-xs"
-            >
-              Enviar notificación
-            </button>
-            {!client && <p className="text-[11px] text-slate-400">Primero abre la tarjeta de un cliente.</p>}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <Bell className="w-4 h-4 text-amber-500" />
+                <span>Enviar promoción al celular</span>
+              </h3>
+              <select
+                value={promoToSend}
+                onChange={(e) => setPromoToSend(e.target.value)}
+                aria-label="Seleccionar promoción"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white"
+              >
+                <option value="">-- Elige una promoción activa --</option>
+                {promotions.filter((p) => p.active).map((p) => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={sendPromotion}
+                disabled={!client || !promoToSend}
+                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-amber-950 font-bold py-2.5 rounded-xl text-xs"
+              >
+                Enviar notificación
+              </button>
+              {!client && <p className="text-[11px] text-slate-400">Primero abre la tarjeta de un cliente.</p>}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

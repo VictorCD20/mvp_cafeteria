@@ -32,7 +32,12 @@ const badgeTones = {
   blue: 'bg-blue-100 text-blue-700'
 };
 
-export const Sidebar = () => {
+interface SidebarProps {
+  onSelect?: () => void;
+  isMobile?: boolean;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
   const { activeTab, setActiveTab, setSubTab, ingredients, clients } = useCodia();
 
   const lowStockCount = ingredients.filter((i) => i.currentStock <= i.minStock).length;
@@ -89,10 +94,17 @@ export const Sidebar = () => {
   const handleSelectTab = (tabId: string) => {
     setActiveTab(tabId);
     setSubTab('');
+    if (onSelect) onSelect();
   };
 
   return (
-    <aside className="w-[17rem] bg-slate-100 text-slate-600 flex flex-col shrink-0 h-screen border-r border-slate-200">
+    <aside
+      className={
+        isMobile
+          ? 'w-full bg-slate-100 text-slate-600 flex flex-col h-full overflow-y-auto'
+          : 'hidden md:flex w-[17rem] bg-slate-100 text-slate-600 flex flex-col shrink-0 h-screen border-r border-slate-200'
+      }
+    >
       {/* Marca */}
       <div className="px-5 h-16 border-b border-slate-200 flex items-center gap-3 shrink-0">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white">

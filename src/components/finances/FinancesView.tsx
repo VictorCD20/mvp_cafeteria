@@ -28,10 +28,14 @@ export const FinancesView = () => {
     simulateOcrScan,
     invoices,
     requestInvoice,
-    config
+    config,
+    subTab,
+    setSubTab
   } = useCodia();
 
-  const [activeSubTab, setActiveSubTab] = useState<'resumen' | 'gastos' | 'ocr' | 'facturacion'>('resumen');
+  const activeSubTab: 'resumen' | 'gastos' | 'ocr' | 'facturacion' =
+    subTab === 'gastos' || subTab === 'ocr' || subTab === 'facturacion' ? subTab : 'resumen';
+  const setActiveSubTab = (tab: 'resumen' | 'gastos' | 'ocr' | 'facturacion') => setSubTab(tab);
 
   // Manual Expense Modal
   const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);

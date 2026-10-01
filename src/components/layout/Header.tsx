@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
-import { Building2, RotateCcw, PlusCircle, Bot, FlaskConical, ChevronDown, CheckCircle, ShieldCheck, Wallet, Sparkles } from 'lucide-react';
+import { Building2, RotateCcw, PlusCircle, Bot, FlaskConical, ChevronDown, CheckCircle, ShieldCheck, Wallet, Sparkles, Menu } from 'lucide-react';
 
 // Integraciones que en esta demo están simuladas (se agrupan en un solo indicador para no saturar la barra).
 const simulatedIntegrations = [
@@ -12,14 +12,30 @@ const simulatedIntegrations = [
   { icon: Sparkles, name: 'Asistente IA', detail: 'Respuestas automáticas con datos de la demo' }
 ];
 
-export const Header = () => {
+interface HeaderProps {
+  onToggleMobileMenu?: () => void;
+  isMobileMenuOpen?: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenuOpen }) => {
   const { config, setActiveTab, resetToSeedData } = useCodia();
   const [showIntegrations, setShowIntegrations] = useState(false);
 
   return (
-    <header className="h-16 shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-40">
+    <header className="h-16 shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-40">
       {/* Negocio y modo demo */}
-      <div className="flex items-center gap-4 min-w-0">
+      <div className="flex items-center gap-3 min-w-0">
+        {onToggleMobileMenu && (
+          <button
+            type="button"
+            onClick={onToggleMobileMenu}
+            aria-expanded={isMobileMenuOpen}
+            aria-label="Abrir menú de navegación"
+            className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 md:hidden"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
         <div className="flex items-center gap-2 min-w-0 text-sm">
           <Building2 className="w-4 h-4 text-blue-500 shrink-0" />
           <span className="font-semibold text-slate-900 dark:text-white truncate">{config.cafeteriaName}</span>

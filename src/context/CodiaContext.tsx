@@ -105,8 +105,76 @@ const CodiaContext = createContext<CodiaContextType | undefined>(undefined);
 
 export const CodiaProvider = ({ children }: { children: ReactNode }) => {
   const [config, setConfig] = useState<SystemConfig>(initialConfig);
-  const [activeTab, setActiveTab] = useState<string>('inicio');
-  const [subTab, setSubTab] = useState<string>('');
+  const [activeTab, setActiveTabState] = useState<string>('inicio');
+  const [subTab, setSubTabState] = useState<string>('');
+
+  const validTabs = [
+    'inicio',
+    'ventas',
+    'inventario',
+    'empleados',
+    'finances',
+    'finanzas',
+    'cliente_consentido',
+    'vista_cliente',
+    'asistente',
+    'reportes',
+    'configuracion'
+  ];
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const syncFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      const subParam = params.get('subTab') || params.get('sub') || '';
+
+      if (tabParam && validTabs.includes(tabParam)) {
+        setActiveTabState(tabParam);
+        setSubTabState(subParam);
+      } else if (!tabParam) {
+        setActiveTabState('inicio');
+        setSubTabState('');
+      } else {
+        // URL inválida -> destino seguro inicio
+        setActiveTabState('inicio');
+        setSubTabState('');
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    };
+
+    syncFromUrl();
+
+    const onPopState = () => syncFromUrl();
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const updateUrlNav = (newTab: string, newSub: string) => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams();
+    if (newTab && newTab !== 'inicio') params.set('tab', newTab);
+    if (newSub) params.set('sub', newSub);
+
+    const queryString = params.toString();
+    const targetQuery = queryString ? `?${queryString}` : '';
+    const newUrl = `${window.location.pathname}${targetQuery}`;
+    if (window.location.search !== targetQuery) {
+      window.history.pushState({ tab: newTab, sub: newSub }, '', newUrl);
+    }
+  };
+
+  const setActiveTab = (tab: string) => {
+    const targetTab = validTabs.includes(tab) ? tab : 'inicio';
+    setActiveTabState(targetTab);
+    setSubTabState('');
+    updateUrlNav(targetTab, '');
+  };
+
+  const setSubTab = (sub: string) => {
+    setSubTabState(sub);
+    updateUrlNav(activeTab, sub);
+  };
 
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialAttendance);
@@ -575,7 +643,7 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
       .replace(/[\u0300-\u036f]/g, '');
     const has = (...words: string[]) => words.some((w) => lower.includes(w));
     const answers: string[] = [];
-    let link: { label: string; tab: string } | undefined = undefined;
+    let link: { label: string; tab: string; subTab?: string } | undefined = undefined;
     const empName = (id: string) => employees.find((e) => e.id === id)?.name ?? 'Empleado';
 
     if (has('vend', 'venta', 'ingreso', 'cobr', 'factur')) {
@@ -587,14 +655,14 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
     if (has('tarde', 'retard', 'llego', 'llegaron', 'puntual')) {
       const late = attendance.filter((a) => a.status === 'retardo').map((a) => `${empName(a.employeeId)} (${a.checkIn})`);
       answers.push(late.length > 0 ? `Llegaron tarde: ${late.join(', ')}.` : 'Nadie llegó tarde hoy.');
-      link = link ?? { label: 'Ver Asistencia y Checador', tab: 'empleados' };
+      link = link ?? { label: 'Ver Asistencia y Checador', tab: 'empleados', subTab: 'asistencia' };
     }
     if (has('falt', 'ausen', 'vino', 'asistencia')) {
       const absents = attendance
         .filter((a) => a.status === 'ausente' || a.status === 'justificado')
         .map((a) => `${empName(a.employeeId)} (${a.status})`);
       answers.push(absents.length > 0 ? `Ausencias de hoy: ${absents.join(', ')}.` : 'No hay faltas reportadas hoy.');
-      link = link ?? { label: 'Ver Asistencia y Checador', tab: 'empleados' };
+      link = link ?? { label: 'Ver Asistencia y Checador', tab: 'empleados', subTab: 'asistencia' };
     }
     if (has('stock', 'bajo', 'insumo', 'inventario', 'agot', 'falta de')) {
       const lowStock = ingredients.filter((i) => i.currentStock <= i.minStock);
@@ -603,12 +671,12 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
           ? `Insumos por debajo del mínimo: ${lowStock.map((l) => `${l.name} (${l.currentStock} ${l.unit})`).join(', ')}.`
           : 'Todos los insumos están en niveles óptimos.'
       );
-      link = link ?? { label: 'Revisar Inventario', tab: 'inventario' };
+      link = link ?? { label: 'Revisar Inventario', tab: 'inventario', subTab: 'insumos' };
     }
     if (has('gasto', 'egreso', 'comprobante', 'gastamos')) {
       const totalExp = expenses.reduce((acc, e) => acc + e.total, 0);
       answers.push(`Egresos registrados: $${totalExp.toLocaleString('es-MX')} MXN en ${expenses.length} comprobantes.`);
-      link = link ?? { label: 'Ver Finanzas & OCR', tab: 'finanzas' };
+      link = link ?? { label: 'Ver Egresos', tab: 'finanzas', subTab: 'gastos' };
     }
     if (has('recompensa', 'cliente', 'sello', 'wallet', 'tarjeta', 'premio')) {
       const withRewards = clients.filter((c) => c.rewardsAvailable > 0).map((c) => c.name);
@@ -617,12 +685,12 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
           ? `Hay ${clients.length} clientes registrados; con recompensa lista: ${withRewards.join(', ')}.`
           : `Hay ${clients.length} clientes registrados y ninguno tiene recompensa pendiente.`
       );
-      link = link ?? { label: 'Ver Cliente Consentido', tab: 'cliente_consentido' };
+      link = link ?? { label: 'Ver Wallet y Tarjetas', tab: 'cliente_consentido', subTab: 'wallet' };
     }
     if (has('promo', 'descuento', '2x1', 'oferta')) {
       const active = promotions.filter((p) => p.active).map((p) => `${p.title} (${p.code})`);
       answers.push(active.length > 0 ? `Promociones activas: ${active.join('; ')}.` : 'No hay promociones activas.');
-      link = link ?? { label: 'Ver Promociones', tab: 'cliente_consentido' };
+      link = link ?? { label: 'Ver Promociones', tab: 'cliente_consentido', subTab: 'promociones' };
     }
 
     const reply =

@@ -28,10 +28,14 @@ export const InventoryView = () => {
     addProduct,
     recipes,
     addRecipe,
-    movements
+    movements,
+    subTab,
+    setSubTab
   } = useCodia();
 
-  const [activeSubTab, setActiveSubTab] = useState<'insumos' | 'productos' | 'recetas' | 'movimientos'>('insumos');
+  const activeSubTab: 'insumos' | 'productos' | 'recetas' | 'movimientos' =
+    subTab === 'productos' || subTab === 'recetas' || subTab === 'movimientos' ? subTab : 'insumos';
+  const setActiveSubTab = (tab: 'insumos' | 'productos' | 'recetas' | 'movimientos') => setSubTab(tab);
   const [search, setSearch] = useState('');
 
   // Stock update modal

@@ -188,5 +188,5 @@ export interface BotMessage {
   sender: 'user' | 'bot';
   text: string;
   timestamp: string;
-  actionableLink?: { label: string; tab: string };
+  actionableLink?: { label: string; tab: string; subTab?: string };
 }

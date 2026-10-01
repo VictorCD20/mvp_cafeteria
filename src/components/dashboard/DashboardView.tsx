@@ -53,8 +53,13 @@ const LinkButton = ({ label, onClick }: { label: string; onClick: () => void }) 
 );
 
 export const DashboardView = () => {
-  const { sales, expenses, attendance, employees, ingredients, clients, setActiveTab } = useCodia();
+  const { sales, expenses, attendance, employees, ingredients, clients, setActiveTab, setSubTab } = useCodia();
   const [showAllStaff, setShowAllStaff] = useState(false);
+
+  const goTo = (tab: string, sub?: string) => {
+    setActiveTab(tab);
+    setSubTab(sub || '');
+  };
 
   // Métricas
   const ticketSales = sales.filter((s) => !s.isShiftSummary);
@@ -128,20 +133,27 @@ export const DashboardView = () => {
             {todayLabel} · Aquí está la visión general de la cafetería en tiempo real.
           </p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
-            onClick={() => setActiveTab('ventas')}
-            className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2"
+            onClick={() => goTo('ventas')}
+            className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3.5 py-2.5 rounded-lg transition-colors flex items-center gap-2"
           >
             <ShoppingCart className="w-4 h-4" />
             <span>Punto de venta</span>
           </button>
           <button
-            onClick={() => setActiveTab('finanzas')}
-            className="bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-2"
+            onClick={() => goTo('finanzas', 'gastos')}
+            className="bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-2"
           >
             <Receipt className="w-4 h-4 text-blue-500" />
-            <span>Egresos y OCR</span>
+            <span>Registrar egreso</span>
+          </button>
+          <button
+            onClick={() => goTo('finanzas', 'ocr')}
+            className="bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-2"
+          >
+            <Receipt className="w-4 h-4 text-indigo-500" />
+            <span>Escanear comprobante</span>
           </button>
         </div>
       </div>
@@ -180,7 +192,7 @@ export const DashboardView = () => {
                   <Package className="w-4 h-4 text-amber-500" />
                   Alertas de stock bajo ({lowStockItems.length})
                 </h3>
-                <LinkButton label="Ver inventario" onClick={() => setActiveTab('inventario')} />
+                <LinkButton label="Ver inventario" onClick={() => goTo('inventario', 'insumos')} />
               </div>
               {lowStockItems.length > 0 ? (
                 <ul className="space-y-2">
@@ -214,7 +226,7 @@ export const DashboardView = () => {
                   <span className="font-medium">{lateCount} retardo</span> y <span className="font-medium">{absentCount} falta</span> en el turno de hoy
                 </div>
               </div>
-              <LinkButton label="Ver checador" onClick={() => setActiveTab('empleados')} />
+              <LinkButton label="Ver checador" onClick={() => goTo('empleados', 'asistencia')} />
             </div>
 
             {/* Recompensas */}
@@ -228,27 +240,36 @@ export const DashboardView = () => {
                   )}
                 </div>
               </div>
-              <LinkButton label="Ver clientes" onClick={() => setActiveTab('cliente_consentido')} />
+              <LinkButton label="Ver clientes" onClick={() => goTo('cliente_consentido', 'wallet')} />
             </div>
           </div>
         </SectionCard>
 
-        <section className="bg-purple-50 border border-purple-200 p-6 rounded-2xl flex flex-col">
-          <div className="flex items-center gap-2 text-purple-600 text-xs font-semibold uppercase tracking-wide">
-            <Heart className="w-4 h-4" />
-            <span>Cliente Consentido</span>
+        <section className="bg-purple-50 border border-purple-200 p-6 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-purple-600 text-xs font-semibold uppercase tracking-wide">
+              <Heart className="w-4 h-4" />
+              <span>Cliente Consentido</span>
+            </div>
+            <h2 className="text-lg font-semibold text-purple-900 mt-3">Fidelización de clientes</h2>
+            <p className="text-sm text-purple-700 mt-2 leading-relaxed">
+              {clients.length} clientes registrados en la wallet simulada.
+            </p>
           </div>
-          <h2 className="text-lg font-semibold text-purple-900 mt-3">Fidelización de clientes</h2>
-          <p className="text-sm text-purple-700 mt-2 leading-relaxed">
-            {clients.length} clientes registrados en la wallet simulada.
-          </p>
-          <div className="flex-1" />
-          <button
-            onClick={() => setActiveTab('cliente_consentido')}
-            className="mt-6 w-full bg-purple-600 text-white hover:bg-purple-700 text-xs font-semibold py-2.5 rounded-lg transition-colors"
-          >
-            Abrir Wallet y tarjetas
-          </button>
+          <div className="space-y-2 mt-6">
+            <button
+              onClick={() => goTo('cliente_consentido', 'wallet')}
+              className="w-full bg-purple-600 text-white hover:bg-purple-700 text-xs font-semibold py-2.5 rounded-lg transition-colors"
+            >
+              Abrir Wallet y tarjetas
+            </button>
+            <button
+              onClick={() => goTo('cliente_consentido', 'promociones')}
+              className="w-full bg-white text-purple-700 border border-purple-300 hover:bg-purple-100 text-xs font-semibold py-2 rounded-lg transition-colors"
+            >
+              Ver promociones
+            </button>
+          </div>
         </section>
       </div>
 
@@ -301,7 +322,7 @@ export const DashboardView = () => {
           title="Asistencia de hoy"
           subtitle={`${staffOnTime.length} puntuales · ${staffNeedingAttention.length} por revisar`}
           icon={<Clock className="w-4 h-4 text-indigo-500" />}
-          action={<LinkButton label="Ver checador" onClick={() => setActiveTab('empleados')} />}
+          action={<LinkButton label="Ver checador" onClick={() => goTo('empleados', 'asistencia')} />}
         >
           <ul className="space-y-3">
             {(showAllStaff ? [...staffNeedingAttention, ...staffOnTime] : staffNeedingAttention).map(({ emp, att }) => (

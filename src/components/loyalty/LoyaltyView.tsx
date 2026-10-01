@@ -28,10 +28,14 @@ export const LoyaltyView = () => {
     promotions,
     addPromotion,
     togglePromotion,
-    config
+    config,
+    subTab,
+    setSubTab
   } = useCodia();
 
-  const [activeSubTab, setActiveSubTab] = useState<'clientes' | 'wallet' | 'promociones' | 'recompensas'>('clientes');
+  const activeSubTab: 'clientes' | 'wallet' | 'promociones' | 'recompensas' =
+    subTab === 'wallet' || subTab === 'promociones' || subTab === 'recompensas' ? subTab : 'clientes';
+  const setActiveSubTab = (tab: 'clientes' | 'wallet' | 'promociones' | 'recompensas') => setSubTab(tab);
   const [selectedClientId, setSelectedClientId] = useState<string>(clients[0]?.id || '');
   const [search, setSearch] = useState('');
 

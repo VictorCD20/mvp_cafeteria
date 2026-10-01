@@ -11,7 +11,7 @@ const quickPrompts = ['Ventas del día', '¿Quién faltó hoy?', 'Stock bajo'];
  * Comparte la conversación con la sección "Asistente CODIA" (mismo estado del contexto).
  */
 export const FloatingAssistant = () => {
-  const { activeTab, setActiveTab, botMessages, sendBotMessage } = useCodia();
+  const { activeTab, setActiveTab, setSubTab, botMessages, sendBotMessage } = useCodia();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
@@ -109,7 +109,10 @@ export const FloatingAssistant = () => {
                   </div>
                   {msg.actionableLink && (
                     <button
-                      onClick={() => setActiveTab(msg.actionableLink!.tab)}
+                      onClick={() => {
+                        setActiveTab(msg.actionableLink!.tab);
+                        setSubTab(msg.actionableLink!.subTab || '');
+                      }}
                       className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       <span>{msg.actionableLink.label}</span>

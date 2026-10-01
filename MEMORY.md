@@ -1,9 +1,13 @@
 # MEMORY · MVP Cafetería
 
 ## Estado actual (2026-10-01)
-- Demo funcional en memoria (sin base de datos). Cambios subidos a `main` el 2026-10-01 (aprobado por Kevin) y publicados en Vercel.
+- Demo funcional en memoria (sin base de datos). Corrección de navegación, sincronización de subsecciones en URL, drawer móvil accesible y vista del cliente pública separada en `/cliente`.
 
 ## Decisiones (y por qué)
+- Navegación URL bidireccional (`?tab=...&sub=...`): al recargar la página (F5) o usar los botones Atrás/Adelante del navegador, la ubicación y subsección exactas se conservan. URLs inválidas redirigen limpiamente a `inicio`.
+- Sincronización de subsecciones en vistas: `EmployeesView`, `FinancesView`, `LoyaltyView` e `InventoryView` ahora escuchan y actualizan `subTab` desde `useCodia()`, permitiendo que todos los enlaces rápidos ("Ver checador" → `asistencia`, "Wallet y tarjetas" → `wallet`, "Promociones" → `promociones`, "Registrar egreso" → `gastos`, "Escanear comprobante" → `ocr`, "Ver inventario" → `insumos`) abran exactamente la subpestaña anunciada.
+- Menú móvil (Drawer): en pantallas móviles (<768px), la barra lateral se oculta y se habilita un drawer colapsable desde el botón de hamburguesa en la barra superior. Es navegable por teclado, se cierra con `Escape` o al seleccionar un módulo y comunica `aria-current`.
+- Vista del cliente independiente (`/cliente`): ruta pública separada de la administración sin controles de caja ni selector de clientes del negocio, usando datos de prueba simulados e indicador de demo.
 - Promociones reales en el POS (`quoteSale`): para que el 2x1/doble sello no sea solo visual.
 - Interruptor "Simular viernes" en POS: la demo puede ser cualquier día.
 - Se quitó "pagar con Wallet": prometía pagos que no existen.
