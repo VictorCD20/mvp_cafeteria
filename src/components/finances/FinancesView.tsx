@@ -115,24 +115,24 @@ export const FinancesView = () => {
   const netBalance = totalSales - totalExpenses;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-8 animate-in fade-in duration-300">
       {/* Module Header & Subtabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
             <CircleDollarSign className="w-6 h-6 text-blue-600" />
             <span>Finanzas, OCR & Facturación</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-2xl leading-relaxed">
             Balance operativo, digitalización de tickets con OCR y emisión de CFDI simulada.
           </p>
         </div>
 
         {/* Subtabs Buttons */}
-        <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+        <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl shrink-0 overflow-x-auto max-w-full">
           <button
             onClick={() => setActiveSubTab('resumen')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
               activeSubTab === 'resumen'
                 ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -142,7 +142,7 @@ export const FinancesView = () => {
           </button>
           <button
             onClick={() => setActiveSubTab('gastos')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
               activeSubTab === 'gastos'
                 ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -152,7 +152,7 @@ export const FinancesView = () => {
           </button>
           <button
             onClick={() => setActiveSubTab('ocr')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
               activeSubTab === 'ocr'
                 ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -162,7 +162,7 @@ export const FinancesView = () => {
           </button>
           <button
             onClick={() => setActiveSubTab('facturacion')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
               activeSubTab === 'facturacion'
                 ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'

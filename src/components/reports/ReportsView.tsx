@@ -27,15 +27,15 @@ export const ReportsView = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-8 animate-in fade-in duration-300">
       {/* Header & Period Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
             <BarChart3 className="w-6 h-6 text-blue-600" />
             <span>Reportes & Métricas del Negocio</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-2xl leading-relaxed">
             Visualización consolidada de ventas, gastos, asistencia y cliente consentido.
           </p>
         </div>
@@ -46,7 +46,7 @@ export const ReportsView = () => {
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap capitalize transition ${
                   period === p
                     ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
                     : 'text-slate-500'

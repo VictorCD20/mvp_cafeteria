@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
 import { Client, Promotion } from '../../types';
+import { PageHeader } from '../ui/PageHeader';
 import { Bell, Coffee, Gift, QrCode, ScanLine, Smartphone, Store, UserPlus } from 'lucide-react';
 
 type PhoneScreen = 'poster' | 'registro' | 'tarjeta';
@@ -98,18 +99,14 @@ export const CustomerView = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-          <Smartphone className="w-5 h-5 text-purple-500" />
-          <span>Vista del cliente</span>
-        </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Así lo vive el cliente en su celular: escanea el QR del mostrador, se registra y guarda su tarjeta. A la derecha, lo que hace el cajero.
-        </p>
-      </div>
+    <div className="space-y-8 animate-in fade-in duration-300">
+      <PageHeader
+        icon={<Smartphone className="w-6 h-6 text-purple-500" />}
+        title="Vista del cliente"
+        description="Así lo vive el cliente en su celular: escanea el QR del mostrador, se registra y guarda su tarjeta. A la derecha, lo que hace el cajero."
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* CELULAR DEL CLIENTE */}
         <div className="flex justify-center">
           <div className="w-[320px] rounded-[2.5rem] border-[10px] border-slate-800 bg-slate-950 shadow-2xl overflow-hidden">
@@ -268,8 +265,8 @@ export const CustomerView = () => {
         </div>
 
         {/* PANEL DE CAJA */}
-        <div className="space-y-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+        <div className="space-y-5">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <UserPlus className="w-4 h-4 text-purple-500" />
               <span>Ver la tarjeta de un cliente</span>
@@ -289,7 +286,7 @@ export const CustomerView = () => {
             </select>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <Store className="w-4 h-4 text-blue-500" />
               <span>Caja (cajero)</span>
@@ -329,7 +326,7 @@ export const CustomerView = () => {
             )}
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <Bell className="w-4 h-4 text-amber-500" />
               <span>Enviar promoción al celular</span>

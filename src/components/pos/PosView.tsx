@@ -175,8 +175,8 @@ export const PosView = () => {
       </div>
 
       {/* Right Column (1 Col): Order Ticket & Checkout */}
-      <div className="space-y-4">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-lg flex flex-col justify-between min-h-[520px]">
+      <div className="lg:sticky lg:top-0 lg:self-start">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto">
           <div>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
               <h2 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center space-x-2">

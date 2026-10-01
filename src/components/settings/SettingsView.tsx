@@ -27,14 +27,14 @@ export const SettingsView = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-300">
+      <div className="pb-6 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
             <Settings className="w-6 h-6 text-blue-600" />
             <span>Configuración General del Sistema</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-2xl leading-relaxed">
             Parámetros operativos de la sucursal, tolerancias y reglas de fidelización.
           </p>
         </div>

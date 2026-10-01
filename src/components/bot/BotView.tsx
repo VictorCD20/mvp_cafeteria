@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useCodia } from '../../context/CodiaContext';
-import { Bot, Send, Sparkles, User, ExternalLink, RefreshCcw } from 'lucide-react';
+import { PageHeader } from '../ui/PageHeader';
+import { Bot, Send, User, ExternalLink, RefreshCcw } from 'lucide-react';
 
 export const BotView = () => {
   const { botMessages, sendBotMessage, setActiveTab } = useCodia();
@@ -10,7 +11,9 @@ export const BotView = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Desplaza solo la caja del chat (no toda la página) hasta el último mensaje.
+    const list = messagesEndRef.current?.parentElement;
+    if (list) list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
   }, [botMessages]);
 
   const handleSend = (e: React.FormEvent) => {
@@ -30,35 +33,28 @@ export const BotView = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-3xl text-white border border-slate-800 shadow-xl flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
-            <Bot className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="inline-flex items-center space-x-1 text-blue-400 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Asistente Inteligente CODIA</span>
-            </div>
-            <h1 className="text-xl font-black text-white">Bot Administrativo en Tiempo Real</h1>
-          </div>
-        </div>
-        <div className="hidden sm:flex items-center space-x-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-xs font-bold">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Conectado a Datos Vivo</span>
-        </div>
-      </div>
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300">
+      {/* Encabezado */}
+      <PageHeader
+        icon={<Bot className="w-6 h-6 text-indigo-500" />}
+        title="Asistente CODIA"
+        description="Bot administrativo en tiempo real: pregunta por ventas, retardos y faltas, inventario, gastos, clientes y promociones."
+        actions={
+          <span className="flex items-center gap-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Conectado a datos vivos
+          </span>
+        }
+      />
 
       {/* Quick Prompt Pills */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-1 text-xs">
-        <span className="text-slate-400 font-bold uppercase text-[10px] shrink-0">Consultas Rápidas:</span>
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-slate-500 font-medium mr-1">Consultas rápidas:</span>
         {quickPrompts.map((promptText, idx) => (
           <button
             key={idx}
             onClick={() => sendBotMessage(promptText)}
-            className="bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-xl font-semibold transition shrink-0 shadow-sm"
+            className="bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-full font-medium transition-colors"
           >
             {promptText}
           </button>

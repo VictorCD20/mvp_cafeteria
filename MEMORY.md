@@ -10,6 +10,9 @@
 - Vista del cliente nueva: muestra registro por QR, tarjeta, canje y notificación (lo que más vende).
 - Cortes de caja semilla (27-29 sep): balance positivo y realista sin inflar "ventas del día".
 - El cliente nuevo recibe 1 sello de bienvenida (comportamiento original de Víctor).
+- Rediseño (Kevin: "organizar, no eliminar"): menú agrupado por área, barra superior en una línea con integraciones simuladas dentro de "Modo demo", encabezado uniforme por módulo (`ui/PageHeader.tsx`), más espacio entre secciones y ancho máximo de contenido.
+- Inicio: "Requiere tu atención" concentra stock bajo, retardos/faltas y recompensas; asistencia muestra primero pendientes y el resto con "Ver también".
+- Cada módulo abre arriba; el chat del bot hace scroll solo dentro de su caja.
 
 ## Errores a evitar
 - No calcular "hoy" en UTC. No dejar clientes semilla en 8/8. No usar setState para devolver resultados (bug del canje).
