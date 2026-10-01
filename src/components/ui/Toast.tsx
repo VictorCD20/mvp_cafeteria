@@ -10,7 +10,7 @@ export const Toast = () => {
   if (!toastMessage) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center space-x-3 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-slate-700 animate-in fade-in slide-in-from-bottom-5 duration-300">
+    <div role="status" className="fixed top-20 right-6 z-[60] max-w-sm flex items-center space-x-3 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl border border-slate-700 animate-in fade-in slide-in-from-top-2 duration-300">
       <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" />
       <span className="text-sm font-medium text-slate-100">{toastMessage}</span>
     </div>

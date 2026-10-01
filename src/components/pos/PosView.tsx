@@ -177,7 +177,8 @@ export const PosView = () => {
       {/* Right Column (1 Col): Order Ticket & Checkout */}
       <div className="lg:sticky lg:top-0 lg:self-start">
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto">
-          <div>
+          {/* Solo la lista del ticket hace scroll; el cobro queda siempre visible abajo */}
+          <div className="min-h-[7rem] flex-1 lg:overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
               <h2 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center space-x-2">
                 <Receipt className="w-5 h-5 text-blue-600" />
@@ -245,7 +246,7 @@ export const PosView = () => {
           </div>
 
           {/* Checkout Controls */}
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3 shrink-0">
             {/* Associate Client for Loyalty */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center space-x-1">

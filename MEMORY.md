@@ -13,6 +13,12 @@
 - Rediseño (Kevin: "organizar, no eliminar"): menú agrupado por área, barra superior en una línea con integraciones simuladas dentro de "Modo demo", encabezado uniforme por módulo (`ui/PageHeader.tsx`), más espacio entre secciones y ancho máximo de contenido.
 - Inicio: "Requiere tu atención" concentra stock bajo, retardos/faltas y recompensas; asistencia muestra primero pendientes y el resto con "Ver también".
 - Cada módulo abre arriba; el chat del bot hace scroll solo dentro de su caja.
+- Asistente flotante (mini chat) abajo a la derecha, comparte conversación con la sección; en POS se mueve a la izquierda para no tapar "Confirmar venta". Avisos (toasts) movidos arriba a la derecha.
+- POS: el cobro (total + confirmar) queda fijo abajo del ticket; solo la lista de productos hace scroll.
+
+## Ideas pendientes (NO implementar hasta que Kevin decida)
+- Roles: Administrador (dueña, ve todo desde celular/compu: finanzas, OCR, promociones, checador/horarios, reportes) y Caja/empleados (computadora del local: ventas, corte, registrar clientes y sellos; sin bot ni finanzas). Real con Supabase RLS. Por definir: PIN por empleado vs cuenta compartida, flujo mesero→cajero, corte de caja.
+- Fusionar la pestaña "Wallet simulada" con "Vista del cliente" (aprobado por Kevin, pendiente de hacer).
 
 ## Errores a evitar
 - No calcular "hoy" en UTC. No dejar clientes semilla en 8/8. No usar setState para devolver resultados (bug del canje).

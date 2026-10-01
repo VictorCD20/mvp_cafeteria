@@ -4,6 +4,7 @@ import React, { ReactNode, useEffect, useRef } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Toast } from '../ui/Toast';
+import { FloatingAssistant } from '../bot/FloatingAssistant';
 import { useCodia } from '../../context/CodiaContext';
 
 export const AdminLayout = ({ children }: { children: ReactNode }) => {
@@ -24,12 +25,15 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header />
         <main ref={mainRef} className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
-          <div className="max-w-7xl mx-auto px-6 py-8 lg:px-10 lg:py-10">{children}</div>
+          <div className="max-w-7xl mx-auto px-6 pt-8 pb-28 lg:px-10 lg:pt-10">{children}</div>
         </main>
       </div>
 
       {/* Global Toast Notification */}
       <Toast />
+
+      {/* Asistente flotante (mini chat) */}
+      <FloatingAssistant />
     </div>
   );
 };
