@@ -3,20 +3,14 @@
 import React, { useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
 import { Modal } from '../ui/Modal';
-import { RecipeItem } from '../../types';
+import { Ingredient, RecipeItem } from '../../types';
 import {
   Package,
-  Coffee,
-  BookOpen,
-  History,
   Plus,
   AlertTriangle,
-  CheckCircle2,
   ArrowUpRight,
   ArrowDownRight,
   Search,
-  ChevronRight,
-  Scale
 } from 'lucide-react';
 
 export const InventoryView = () => {
@@ -25,7 +19,6 @@ export const InventoryView = () => {
     addIngredient,
     updateIngredientStock,
     products,
-    addProduct,
     recipes,
     addRecipe,
     movements,
@@ -114,7 +107,7 @@ export const InventoryView = () => {
     }
   };
 
-  const updateRecipeItemRow = (index: number, field: keyof RecipeItem, value: any) => {
+  const updateRecipeItemRow = (index: number, field: keyof RecipeItem, value: string | number) => {
     setRecipeItems((prev) => {
       const copy = [...prev];
       if (field === 'ingredientId') {
@@ -486,7 +479,7 @@ export const InventoryView = () => {
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Categoría</label>
               <select
                 value={ingCategory}
-                onChange={(e) => setIngCategory(e.target.value as any)}
+                onChange={(e) => setIngCategory(e.target.value as Ingredient['category'])}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
               >
                 <option value="granos">Granos / Polvos</option>
@@ -501,7 +494,7 @@ export const InventoryView = () => {
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Unidad Medida</label>
               <select
                 value={ingUnit}
-                onChange={(e) => setIngUnit(e.target.value as any)}
+                onChange={(e) => setIngUnit(e.target.value as Ingredient['unit'])}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
               >
                 <option value="g">Gramos (g)</option>

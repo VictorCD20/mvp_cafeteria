@@ -14,11 +14,16 @@ import {
   Settings,
   Coffee,
   Smartphone,
+  LogOut,
+  LogIn,
   LucideIcon
 } from 'lucide-react';
+import { latestAttendanceByEmployee } from '../../lib/attendance';
+import { todayInMexico } from '../../lib/dates';
+import { ModuleId } from '../../types';
 
 interface NavItem {
-  id: string;
+  id: ModuleId;
   label: string;
   icon: LucideIcon;
   badge?: string;
@@ -38,7 +43,19 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
-  const { activeTab, setActiveTab, setSubTab, ingredients, clients } = useCodia();
+  const {
+    activeTab,
+    setActiveTab,
+    ingredients,
+    clients,
+    can,
+    currentUser,
+    currentRole,
+    logout,
+    attendance,
+    registerCheckIn,
+    registerCheckOut
+  } = useCodia();
 
   const lowStockCount = ingredients.filter((i) => i.currentStock <= i.minStock).length;
   const rewardsAvailableCount = clients.filter((c) => c.rewardsAvailable > 0).length;
@@ -91,9 +108,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
     }
   ];
 
+  // Cada rol solo ve los módulos que tiene permitidos; los grupos vacíos se ocultan.
+  const visibleGroups = groups
+    .map((group) => ({ ...group, items: group.items.filter((item) => can(item.id)) }))
+    .filter((group) => group.items.length > 0);
+
+  // Checador propio: cualquier persona registra su entrada/salida desde su sesión.
+  const myRecord = currentUser ? latestAttendanceByEmployee(attendance).get(currentUser.id) : undefined;
+  const myToday = myRecord?.date === todayInMexico() ? myRecord : undefined;
+
   const handleSelectTab = (tabId: string) => {
     setActiveTab(tabId);
-    setSubTab('');
     if (onSelect) onSelect();
   };
 
@@ -121,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
 
       {/* Navegación agrupada */}
       <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6" aria-label="Módulos">
-        {groups.map((group) => (
+        {visibleGroups.map((group) => (
           <div key={group.label}>
             <div className="px-3 mb-2 text-[11px] font-semibold tracking-wide text-slate-500 uppercase">{group.label}</div>
             <div className="space-y-0.5">
@@ -159,22 +184,55 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
         ))}
       </nav>
 
-      {/* Usuario activo */}
-      <div className="p-4 border-t border-slate-200 flex items-center gap-3 shrink-0">
-        <div className="relative shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
-            alt="Laura Méndez"
-            className="w-9 h-9 rounded-full object-cover"
-          />
-          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-slate-100" />
+      {/* Usuario activo, checador propio y cierre de sesión */}
+      {currentUser && (
+        <div className="p-4 border-t border-slate-200 space-y-3 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="relative shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={currentUser.avatar} alt={currentUser.name} className="w-9 h-9 rounded-full object-cover" />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-slate-100" />
+            </div>
+            <div className="min-w-0 flex-1 leading-tight">
+              <div className="text-sm font-medium text-slate-900 truncate">{currentUser.name}</div>
+              <div className="text-[11px] text-slate-500 truncate">{currentRole?.name ?? 'Sin rol'} · v0.1 demo</div>
+            </div>
+            <button
+              type="button"
+              onClick={logout}
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+              className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex items-center gap-2 text-[11px]">
+            <span className="flex-1 text-slate-500 truncate">
+              {myToday?.checkIn ? `Entrada ${myToday.checkIn}${myToday.checkOut ? ` · Salida ${myToday.checkOut}` : ''}` : 'Sin entrada hoy'}
+            </span>
+            {!myToday?.checkIn ? (
+              <button
+                type="button"
+                onClick={() => registerCheckIn(currentUser.id)}
+                className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-2.5 py-1 rounded-lg"
+              >
+                <LogIn className="w-3.5 h-3.5" /> Entrada
+              </button>
+            ) : (
+              !myToday.checkOut && (
+                <button
+                  type="button"
+                  onClick={() => registerCheckOut(currentUser.id)}
+                  className="flex items-center gap-1 bg-slate-700 hover:bg-slate-600 text-white font-semibold px-2.5 py-1 rounded-lg"
+                >
+                  <LogOut className="w-3.5 h-3.5" /> Salida
+                </button>
+              )
+            )}
+          </div>
         </div>
-        <div className="min-w-0 leading-tight">
-          <div className="text-sm font-medium text-slate-900 truncate">Laura Méndez</div>
-          <div className="text-[11px] text-slate-500 truncate">Administradora · v0.1 demo</div>
-        </div>
-      </div>
+      )}
     </aside>
   );
 };

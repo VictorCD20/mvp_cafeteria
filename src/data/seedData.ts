@@ -1,4 +1,37 @@
-import { Employee, Ingredient, Product, Recipe, Client, Promotion, Sale, Expense, AttendanceRecord, SystemConfig, InventoryMovement } from '../types';
+import { AccessRole, Employee, Ingredient, Product, Recipe, Client, Promotion, Sale, Expense, AttendanceRecord, SystemConfig, InventoryMovement } from '../types';
+import { todayInMexico } from '../lib/dates';
+
+// La asistencia semilla representa el turno de hoy, para que el checador actualice el mismo registro.
+const seedToday = todayInMexico();
+
+export const initialRoles: AccessRole[] = [
+  {
+    id: 'role-admin',
+    name: 'Administrador',
+    description: 'Dueña o gerente: ve todo, administra personal, roles, finanzas y promociones.',
+    permissions: [
+      'inicio',
+      'ventas',
+      'inventario',
+      'empleados',
+      'usuarios',
+      'finanzas',
+      'reportes',
+      'cliente_consentido',
+      'promociones',
+      'vista_cliente',
+      'asistente',
+      'configuracion'
+    ],
+    isSystem: true
+  },
+  {
+    id: 'role-caja',
+    name: 'Caja',
+    description: 'Computadora del local: ventas, inventario, clientes, sellos y canjes.',
+    permissions: ['ventas', 'inventario', 'cliente_consentido', 'vista_cliente']
+  }
+];
 
 export const initialConfig: SystemConfig = {
   cafeteriaName: 'CODIA Cafetería Gourmet',
@@ -18,6 +51,8 @@ export const initialEmployees: Employee[] = [
     code: 'EMP-001',
     name: 'Laura Méndez',
     role: 'administrador',
+    accessRoleId: 'role-admin',
+    pin: '1234',
     dailyRate: 650,
     schedule: '07:00 - 16:00',
     workDays: 'Lunes a Viernes',
@@ -31,6 +66,8 @@ export const initialEmployees: Employee[] = [
     code: 'EMP-002',
     name: 'Ana Torres',
     role: 'barista',
+    accessRoleId: 'role-caja',
+    pin: '2222',
     dailyRate: 430,
     schedule: '07:00 - 15:00',
     workDays: 'Lunes a Sábado',
@@ -44,6 +81,8 @@ export const initialEmployees: Employee[] = [
     code: 'EMP-003',
     name: 'Luis García',
     role: 'cajero',
+    accessRoleId: 'role-caja',
+    pin: '3333',
     dailyRate: 400,
     schedule: '08:00 - 16:00',
     workDays: 'Lunes a Domingo',
@@ -57,6 +96,8 @@ export const initialEmployees: Employee[] = [
     code: 'EMP-004',
     name: 'Sofía Martínez',
     role: 'barista',
+    accessRoleId: 'role-caja',
+    pin: '4444',
     dailyRate: 430,
     schedule: '14:00 - 22:00',
     workDays: 'Martes a Domingo',
@@ -70,6 +111,8 @@ export const initialEmployees: Employee[] = [
     code: 'EMP-005',
     name: 'Carlos Ramírez',
     role: 'encargado',
+    accessRoleId: 'role-caja',
+    pin: '5555',
     dailyRate: 580,
     schedule: '08:00 - 17:00',
     workDays: 'Lunes a Sábado',
@@ -83,6 +126,8 @@ export const initialEmployees: Employee[] = [
     code: 'EMP-006',
     name: 'María López',
     role: 'cocina',
+    accessRoleId: 'role-caja',
+    pin: '6666',
     dailyRate: 440,
     schedule: '07:00 - 15:00',
     workDays: 'Lunes a Sábado',
@@ -467,27 +512,30 @@ export const initialPromotions: Promotion[] = [
     title: 'Doble Sello de Fidelidad los Viernes',
     description: 'Acumula 2 sellos en tu tarjeta digital en todas tus compras superiores a $100 MXN durante todo el viernes.',
     audience: 'todos',
-    validUntil: '2026-12-31',
+    validUntil: '2027-12-31',
     active: true,
     code: 'VIERNES2X',
-    bonusStamps: 1
+    bonusStamps: 1,
+    fridayOnly: true,
+    minPurchase: 100
   },
   {
     id: 'prom-2',
     title: '15% OFF en Bebidas Frías y Frappés',
     description: 'Descuento especial exclusivo para nuestros clientes frecuentes y VIP en cualquier frappé o iced coffee.',
     audience: 'frecuentes',
-    validUntil: '2026-10-31',
+    validUntil: '2027-06-30',
     active: true,
     code: 'FRIO15',
-    discountPercentage: 15
+    discountPercentage: 15,
+    appliesTo: ['cafe_frio']
   },
   {
     id: 'prom-3',
     title: 'Croissant Gratis al desbloquear Recompensa',
     description: 'Recibe un Croissant de mantequilla recién horneado de regalo al canjear tu recompensa de 8 sellos.',
     audience: 'proximos_recompensa',
-    validUntil: '2026-11-15',
+    validUntil: '2027-03-31',
     active: true,
     code: 'RECOMPENSA_PLUS',
     freeItem: 'Croissant Mantequilla'
@@ -498,7 +546,7 @@ export const initialAttendance: AttendanceRecord[] = [
   {
     id: 'att-1',
     employeeId: 'emp-1',
-    date: '2026-09-30',
+    date: seedToday,
     checkIn: '06:55',
     checkOut: '16:05',
     status: 'puntual',
@@ -507,7 +555,7 @@ export const initialAttendance: AttendanceRecord[] = [
   {
     id: 'att-2',
     employeeId: 'emp-2',
-    date: '2026-09-30',
+    date: seedToday,
     checkIn: '07:22', // Retardo (Tol 15 min)
     status: 'retardo',
     notes: 'Tráfico pesado en zona centro',
@@ -516,7 +564,7 @@ export const initialAttendance: AttendanceRecord[] = [
   {
     id: 'att-3',
     employeeId: 'emp-3',
-    date: '2026-09-30',
+    date: seedToday,
     checkIn: '07:58',
     status: 'puntual',
     deviceSimulated: 'Hikvision DS-K1T804AM'
@@ -524,7 +572,7 @@ export const initialAttendance: AttendanceRecord[] = [
   {
     id: 'att-4',
     employeeId: 'emp-4',
-    date: '2026-09-30',
+    date: seedToday,
     status: 'ausente',
     notes: 'No reportó ingreso al momento',
     deviceSimulated: 'Hikvision DS-K1T804AM'
@@ -532,7 +580,7 @@ export const initialAttendance: AttendanceRecord[] = [
   {
     id: 'att-5',
     employeeId: 'emp-5',
-    date: '2026-09-30',
+    date: seedToday,
     checkIn: '07:50',
     status: 'puntual',
     deviceSimulated: 'Hikvision DS-K1T804AM'
@@ -540,7 +588,7 @@ export const initialAttendance: AttendanceRecord[] = [
   {
     id: 'att-6',
     employeeId: 'emp-6',
-    date: '2026-09-30',
+    date: seedToday,
     checkIn: '06:58',
     status: 'puntual',
     deviceSimulated: 'Hikvision DS-K1T804AM'

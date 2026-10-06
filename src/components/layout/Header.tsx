@@ -18,7 +18,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenuOpen }) => {
-  const { config, setActiveTab, resetToSeedData } = useCodia();
+  const { config, setActiveTab, resetToSeedData, can } = useCodia();
   const [showIntegrations, setShowIntegrations] = useState(false);
 
   return (
@@ -78,6 +78,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
 
       {/* Acciones rápidas */}
       <div className="flex items-center gap-2 shrink-0">
+        {can('ventas') && (
         <button
           onClick={() => setActiveTab('ventas')}
           className="flex items-center gap-1.5 whitespace-nowrap bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors"
@@ -85,7 +86,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
           <PlusCircle className="w-4 h-4" />
           <span>Nueva venta</span>
         </button>
+        )}
 
+        {can('asistente') && (
         <button
           onClick={() => setActiveTab('asistente')}
           title="Preguntar al asistente"
@@ -94,7 +97,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
           <Bot className="w-4 h-4" />
           <span className="hidden xl:inline">Preguntar al bot</span>
         </button>
+        )}
 
+        {can('configuracion') && (
         <button
           onClick={resetToSeedData}
           title="Reiniciar los datos de la demo a su estado original"
@@ -103,6 +108,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
           <RotateCcw className="w-4 h-4" />
           <span className="hidden xl:inline">Reiniciar demo</span>
         </button>
+        )}
       </div>
     </header>
   );

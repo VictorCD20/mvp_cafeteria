@@ -2,41 +2,29 @@
 
 import React, { useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
-import { Client } from '../../types';
+import { } from '../../types';
 import { Modal } from '../ui/Modal';
-import {
-  Heart,
-  Wallet,
-  Gift,
-  Sparkles,
-  Plus,
-  QrCode,
-  CheckCircle2,
-  Tag,
-  Star,
-  Users,
-  Search,
-  Award
-} from 'lucide-react';
+import { Heart, Gift, Plus, Search, ExternalLink } from 'lucide-react';
+import { Product } from '../../types';
 
 export const LoyaltyView = () => {
   const {
     clients,
     addClient,
-    addStampsToClient,
     redeemReward,
     promotions,
     addPromotion,
     togglePromotion,
-    config,
+    can,
+    setActiveTab,
     subTab,
-    setSubTab
+    setSubTab,
   } = useCodia();
 
-  const activeSubTab: 'clientes' | 'wallet' | 'promociones' | 'recompensas' =
-    subTab === 'wallet' || subTab === 'promociones' || subTab === 'recompensas' ? subTab : 'clientes';
-  const setActiveSubTab = (tab: 'clientes' | 'wallet' | 'promociones' | 'recompensas') => setSubTab(tab);
-  const [selectedClientId, setSelectedClientId] = useState<string>(clients[0]?.id || '');
+  const canManagePromos = can('promociones');
+  const activeSubTab: 'clientes' | 'promociones' | 'recompensas' =
+    subTab === 'promociones' || subTab === 'recompensas' ? subTab : 'clientes';
+  const setActiveSubTab = (tab: 'clientes' | 'promociones' | 'recompensas') => setSubTab(tab);
   const [search, setSearch] = useState('');
 
   // Modal states
@@ -53,7 +41,14 @@ export const LoyaltyView = () => {
   const [promoDesc, setPromoDesc] = useState('');
   const [promoAudience, setPromoAudience] = useState<'todos' | 'frecuentes' | 'nuevos' | 'proximos_recompensa' | 'inactivos'>('todos');
   const [promoCode, setPromoCode] = useState('');
-  const [promoValidUntil, setPromoValidUntil] = useState('2026-12-31');
+  const [promoValidUntil, setPromoValidUntil] = useState('2027-12-31');
+  const [promoBenefit, setPromoBenefit] = useState<'descuento' | 'sellos' | 'regalo'>('descuento');
+  const [promoDiscount, setPromoDiscount] = useState(10);
+  const [promoAppliesTo, setPromoAppliesTo] = useState<Product['category'][]>([]);
+  const [promoBonusStamps, setPromoBonusStamps] = useState(1);
+  const [promoFridayOnly, setPromoFridayOnly] = useState(false);
+  const [promoMinPurchase, setPromoMinPurchase] = useState(0);
+  const [promoFreeItem, setPromoFreeItem] = useState('');
 
   const handleAddClientSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,14 +72,27 @@ export const LoyaltyView = () => {
       audience: promoAudience,
       validUntil: promoValidUntil,
       active: true,
-      code: promoCode || 'PROMO10'
+      code: promoCode.trim().toUpperCase() || 'PROMO10',
+      discountPercentage: promoBenefit === 'descuento' ? Number(promoDiscount) : undefined,
+      appliesTo: promoBenefit === 'descuento' ? promoAppliesTo : undefined,
+      bonusStamps: promoBenefit === 'sellos' ? Number(promoBonusStamps) : undefined,
+      fridayOnly: promoBenefit === 'sellos' ? promoFridayOnly : undefined,
+      minPurchase: promoBenefit === 'sellos' && promoMinPurchase > 0 ? Number(promoMinPurchase) : undefined,
+      freeItem: promoBenefit === 'regalo' ? promoFreeItem : undefined
     });
     setIsAddPromoModalOpen(false);
     setPromoTitle('');
     setPromoDesc('');
+    setPromoCode('');
+    setPromoFreeItem('');
   };
 
-  const selectedClient = clients.find((c) => c.id === selectedClientId) || clients[0];
+  const benefitLabel = (promo: (typeof promotions)[number]) => {
+    if (promo.discountPercentage) return `${promo.discountPercentage}% de descuento`;
+    if (promo.bonusStamps) return `+${promo.bonusStamps} sello${promo.bonusStamps > 1 ? 's' : ''} extra`;
+    if (promo.freeItem) return `Regalo: ${promo.freeItem}`;
+    return 'Sin beneficio automático (solo visibilidad)';
+  };
 
   const filteredClients = clients.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -99,10 +107,10 @@ export const LoyaltyView = () => {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
             <Heart className="w-6 h-6 text-purple-600" />
-            <span>Cliente Consentido & Wallet Simulada</span>
+            <span>Cliente Consentido</span>
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-2xl leading-relaxed">
-            Programa de fidelización por sellos digitales, wallet PWA simulada y promociones dirigidas.
+            Programa de fidelización por sellos digitales y promociones dirigidas. Las tarjetas viven en Vista del cliente.
           </p>
         </div>
 
@@ -117,16 +125,6 @@ export const LoyaltyView = () => {
             }`}
           >
             Clientes ({clients.length})
-          </button>
-          <button
-            onClick={() => setActiveSubTab('wallet')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
-              activeSubTab === 'wallet'
-                ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm'
-                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            Wallet Simulada
           </button>
           <button
             onClick={() => setActiveSubTab('promociones')}
@@ -184,7 +182,7 @@ export const LoyaltyView = () => {
                     <th className="p-4">Sellos Actuales</th>
                     <th className="p-4">Recompensas Listas</th>
                     <th className="p-4">Total Visitas</th>
-                    <th className="p-4 text-right">Ver Wallet</th>
+                    <th className="p-4 text-right">Tarjeta</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -237,13 +235,11 @@ export const LoyaltyView = () => {
                       </td>
                       <td className="p-4 text-right">
                         <button
-                          onClick={() => {
-                            setSelectedClientId(client.id);
-                            setActiveSubTab('wallet');
-                          }}
-                          className="bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 text-purple-600 dark:text-purple-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-800 transition"
+                          onClick={() => setActiveTab('vista_cliente', client.id)}
+                          className="bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 text-purple-600 dark:text-purple-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-800 transition inline-flex items-center gap-1"
                         >
-                          Abrir Wallet
+                          <ExternalLink className="w-3 h-3" />
+                          Ver tarjeta
                         </button>
                       </td>
                     </tr>
@@ -255,136 +251,6 @@ export const LoyaltyView = () => {
         </div>
       )}
 
-      {/* TAB 2: WALLET SIMULADA (DIGITAL CARD PREVIEW) */}
-      {activeSubTab === 'wallet' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Client Selector List */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-            <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-              Seleccionar Tarjeta de Cliente
-            </h3>
-            <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
-              {clients.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedClientId(c.id)}
-                  className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition ${
-                    selectedClient?.id === c.id
-                      ? 'bg-purple-600 text-white border-purple-600 shadow-md'
-                      : 'bg-slate-50 dark:bg-slate-800/40 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <img src={c.avatar} alt={c.name} className="w-8 h-8 rounded-full object-cover" />
-                    <div>
-                      <div className="text-xs font-bold">{c.name}</div>
-                      <div className="text-[10px] opacity-80">{c.stamps}/{c.stampsGoal} sellos</div>
-                    </div>
-                  </div>
-                  {c.rewardsAvailable > 0 && (
-                    <span className="bg-emerald-400 text-slate-950 font-black text-[10px] px-1.5 py-0.5 rounded-full">
-                      🎁 {c.rewardsAvailable}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* SIMULATED PWA WALLET CARD (2 Cols) */}
-          <div className="lg:col-span-2 space-y-4">
-            {selectedClient && (
-              <div className="space-y-6">
-                {/* Visual Wallet Card mockup */}
-                <div className="bg-gradient-to-tr from-slate-950 via-purple-950 to-slate-900 text-white p-6 rounded-3xl border border-purple-800/60 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-purple-600/20 blur-[100px] pointer-events-none" />
-
-                  {/* Header info */}
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <div className="inline-flex items-center space-x-1 bg-purple-500/20 border border-purple-500/30 text-purple-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                        <Sparkles className="w-3 h-3" />
-                        <span>Tarjeta Digital Consentido</span>
-                      </div>
-                      <h2 className="text-xl font-extrabold text-white mt-1">{selectedClient.name}</h2>
-                      <div className="text-xs text-purple-300 font-mono">{selectedClient.code}</div>
-                    </div>
-
-                    <div className="text-right">
-                      <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold px-3 py-1 rounded-xl">
-                        {selectedClient.tier}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Stamp Grid (8 slots) */}
-                  <div className="bg-slate-900/80 p-4 rounded-2xl border border-purple-900/60 mb-6">
-                    <div className="text-xs font-bold text-purple-200 mb-3 flex items-center justify-between">
-                      <span>Progreso de Sellos de Café</span>
-                      <span>
-                        {selectedClient.stamps} / {selectedClient.stampsGoal} sellos
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                      {Array.from({ length: 8 }).map((_, index) => {
-                        const isStamped = index < selectedClient.stamps;
-                        return (
-                          <div
-                            key={index}
-                            className={`aspect-square rounded-xl flex items-center justify-center border transition-all ${
-                              isStamped
-                                ? 'bg-gradient-to-tr from-purple-600 to-indigo-500 border-purple-400 text-white shadow-lg shadow-purple-500/30 scale-105'
-                                : 'bg-slate-950/60 border-slate-800 text-slate-700'
-                            }`}
-                          >
-                            {isStamped ? (
-                              <CheckCircle2 className="w-6 h-6" />
-                            ) : (
-                              <span className="text-xs font-bold text-slate-600">{index + 1}</span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* QR Code & Actions */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-white p-2 rounded-xl shadow">
-                        <QrCode className="w-12 h-12 text-slate-950" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">Código QR Cliente</div>
-                        <div className="text-[11px] text-slate-400 font-mono">{selectedClient.qrCode}</div>
-                      </div>
-                    </div>
-
-                    {/* Simulation Controls */}
-                    <div className="flex items-center space-x-2 w-full sm:w-auto">
-                      <button
-                        onClick={() => addStampsToClient(selectedClient.id, 1)}
-                        className="flex-1 sm:flex-initial bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition"
-                      >
-                        +1 Sello Demo
-                      </button>
-                      <button
-                        onClick={() => redeemReward(selectedClient.id)}
-                        disabled={selectedClient.rewardsAvailable === 0}
-                        className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition"
-                      >
-                        Canjear Recompensa ({selectedClient.rewardsAvailable})
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* TAB 3: PROMOCIONES */}
       {activeSubTab === 'promociones' && (
         <div className="space-y-4">
@@ -392,13 +258,15 @@ export const LoyaltyView = () => {
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
               Campañas & Promociones Activas ({promotions.length})
             </h3>
-            <button
-              onClick={() => setIsAddPromoModalOpen(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow transition flex items-center space-x-1"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Nueva Promoción</span>
-            </button>
+            {canManagePromos && (
+              <button
+                onClick={() => setIsAddPromoModalOpen(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow transition flex items-center space-x-1"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Nueva Promoción</span>
+              </button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -412,18 +280,29 @@ export const LoyaltyView = () => {
                     <span className="bg-purple-500/10 text-purple-600 font-bold px-2 py-0.5 rounded text-[10px] uppercase">
                       Audiencia: {promo.audience.replace('_', ' ')}
                     </span>
-                    <button
-                      onClick={() => togglePromotion(promo.id)}
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                        promo.active ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-200 text-slate-500'
-                      }`}
-                    >
-                      {promo.active ? 'Publicada ✓' : 'Pausada'}
-                    </button>
+                    {canManagePromos ? (
+                      <button
+                        onClick={() => togglePromotion(promo.id)}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                          promo.active ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-200 text-slate-500'
+                        }`}
+                      >
+                        {promo.active ? 'Publicada ✓' : 'Pausada'}
+                      </button>
+                    ) : (
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                          promo.active ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-200 text-slate-500'
+                        }`}
+                      >
+                        {promo.active ? 'Publicada' : 'Pausada'}
+                      </span>
+                    )}
                   </div>
 
                   <h4 className="font-bold text-slate-900 dark:text-white text-sm">{promo.title}</h4>
                   <p className="text-xs text-slate-500 mt-1">{promo.description}</p>
+                  <p className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 mt-1.5">{benefitLabel(promo)}</p>
                 </div>
 
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs">
@@ -561,7 +440,7 @@ export const LoyaltyView = () => {
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Audiencia Objetivos</label>
               <select
                 value={promoAudience}
-                onChange={(e) => setPromoAudience(e.target.value as any)}
+                onChange={(e) => setPromoAudience(e.target.value as typeof promoAudience)}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs"
               >
                 <option value="todos">Todos los clientes</option>
@@ -582,11 +461,155 @@ export const LoyaltyView = () => {
               />
             </div>
           </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Beneficio</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(
+                [
+                  { id: 'descuento', label: 'Descuento %' },
+                  { id: 'sellos', label: 'Sellos extra' },
+                  { id: 'regalo', label: 'Producto de regalo' }
+                ] as const
+              ).map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => setPromoBenefit(b.id)}
+                  className={`text-xs font-bold py-2 rounded-xl border transition ${
+                    promoBenefit === b.id
+                      ? 'bg-purple-600 text-white border-purple-600'
+                      : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {promoBenefit === 'descuento' && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Porcentaje de descuento</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  required
+                  value={promoDiscount}
+                  onChange={(e) => setPromoDiscount(Number(e.target.value))}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Aplica a <span className="font-normal text-slate-400">(sin elegir = todo el ticket)</span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {(
+                    [
+                      { id: 'cafe_caliente', label: 'Café caliente' },
+                      { id: 'cafe_frio', label: 'Café frío / frappés' },
+                      { id: 'te_infusiones', label: 'Té e infusiones' },
+                      { id: 'reposteria', label: 'Repostería' },
+                      { id: 'alimentos', label: 'Alimentos' }
+                    ] as { id: Product['category']; label: string }[]
+                  ).map((cat) => (
+                    <label
+                      key={cat.id}
+                      className={`flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg border cursor-pointer ${
+                        promoAppliesTo.includes(cat.id)
+                          ? 'bg-purple-50 border-purple-300 text-purple-700 dark:bg-purple-950/40'
+                          : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="accent-purple-600"
+                        checked={promoAppliesTo.includes(cat.id)}
+                        onChange={() =>
+                          setPromoAppliesTo((prev) =>
+                            prev.includes(cat.id) ? prev.filter((c) => c !== cat.id) : [...prev, cat.id]
+                          )
+                        }
+                      />
+                      {cat.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {promoBenefit === 'sellos' && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Sellos extra por compra</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={7}
+                  required
+                  value={promoBonusStamps}
+                  onChange={(e) => setPromoBonusStamps(Number(e.target.value))}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Compra mínima (MXN)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={promoMinPurchase}
+                  onChange={(e) => setPromoMinPurchase(Number(e.target.value))}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs"
+                />
+              </div>
+              <label className="col-span-2 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={promoFridayOnly}
+                  onChange={(e) => setPromoFridayOnly(e.target.checked)}
+                  className="accent-purple-600"
+                />
+                Solo los viernes (como el Doble Sello)
+              </label>
+            </div>
+          )}
+
+          {promoBenefit === 'regalo' && (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Producto de regalo <span className="font-normal text-slate-400">(se entrega al canjear la recompensa)</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={promoFreeItem}
+                onChange={(e) => setPromoFreeItem(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs"
+                placeholder="ej. Croissant Mantequilla"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Vigente hasta</label>
+            <input
+              type="date"
+              required
+              value={promoValidUntil}
+              onChange={(e) => setPromoValidUntil(e.target.value)}
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+            />
+          </div>
+
           <button
             type="submit"
             className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 rounded-xl text-xs transition"
           >
-            Publicar Promoción en Wallet
+            Publicar Promoción
           </button>
         </form>
       </Modal>

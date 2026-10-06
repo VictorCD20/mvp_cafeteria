@@ -3,21 +3,15 @@
 import React, { useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
 import { Modal } from '../ui/Modal';
+import { Expense } from '../../types';
 import {
   CircleDollarSign,
-  TrendingUp,
-  TrendingDown,
-  Scale,
   Scan,
-  FileText,
   Plus,
   Upload,
   Sparkles,
   CheckCircle2,
-  AlertCircle,
   FileCheck2,
-  Calendar,
-  Building
 } from 'lucide-react';
 
 export const FinancesView = () => {
@@ -28,7 +22,6 @@ export const FinancesView = () => {
     simulateOcrScan,
     invoices,
     requestInvoice,
-    config,
     subTab,
     setSubTab
   } = useCodia();
@@ -43,7 +36,7 @@ export const FinancesView = () => {
   const [expCategory, setExpCategory] = useState<'insumos' | 'mantenimiento' | 'servicios' | 'nomina' | 'otros'>('insumos');
   const [expDesc, setExpDesc] = useState('');
   const [expSubtotal, setExpSubtotal] = useState(1000);
-  const [expTax, setExpTax] = useState(160);
+  const [expTax] = useState(160);
 
   // OCR Simulator State
   const [isScanning, setIsScanning] = useState(false);
@@ -393,7 +386,7 @@ export const FinancesView = () => {
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Categoría</label>
                   <select
                     value={scannedData.category}
-                    onChange={(e) => setScannedData({ ...scannedData, category: e.target.value as any })}
+                    onChange={(e) => setScannedData({ ...scannedData, category: e.target.value as Expense['category'] })}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
                   >
                     <option value="insumos">Insumos</option>
@@ -601,7 +594,7 @@ export const FinancesView = () => {
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Categoría</label>
               <select
                 value={expCategory}
-                onChange={(e) => setExpCategory(e.target.value as any)}
+                onChange={(e) => setExpCategory(e.target.value as Expense['category'])}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
               >
                 <option value="insumos">Insumos</option>

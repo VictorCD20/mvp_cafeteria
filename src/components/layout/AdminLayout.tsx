@@ -14,9 +14,9 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Cada módulo se abre desde arriba (no hereda el scroll del módulo anterior).
+  // El menú móvil se cierra desde el propio Sidebar (onSelect) al elegir un módulo.
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0 });
-    setIsMobileMenuOpen(false);
   }, [activeTab]);
 
   // Tecla Escape para cerrar el menú móvil

@@ -1,10 +1,37 @@
 export type Role = 'administrador' | 'barista' | 'cajero' | 'cocina' | 'encargado';
 
+/** Módulos del panel (coinciden con `activeTab`). */
+export type ModuleId =
+  | 'inicio'
+  | 'ventas'
+  | 'inventario'
+  | 'empleados'
+  | 'finanzas'
+  | 'cliente_consentido'
+  | 'vista_cliente'
+  | 'asistente'
+  | 'reportes'
+  | 'configuracion';
+
+/** Permiso = acceso a un módulo o a una acción sensible. */
+export type Permission = ModuleId | 'promociones' | 'usuarios';
+
+/** Rol de acceso al sistema (distinto del puesto del empleado). */
+export interface AccessRole {
+  id: string;
+  name: string;
+  description: string;
+  permissions: Permission[];
+  isSystem?: boolean; // no se puede editar ni eliminar
+}
+
 export interface Employee {
   id: string;
   code: string; // e.g. EMP-001
   name: string;
-  role: Role;
+  role: Role; // puesto
+  accessRoleId: string;
+  pin: string; // 4 dígitos, demo (en producción iría cifrado en el servidor)
   dailyRate: number; // e.g. $450 MXN
   schedule: string; // e.g. "07:00 - 15:00"
   workDays: string; // e.g. "L-V"
@@ -144,8 +171,11 @@ export interface Promotion {
   active: boolean;
   code: string;
   discountPercentage?: number;
+  appliesTo?: Product['category'][]; // categorías con descuento; vacío = todo el ticket
   freeItem?: string;
   bonusStamps?: number;
+  fridayOnly?: boolean;
+  minPurchase?: number;
 }
 
 export interface SystemConfig {

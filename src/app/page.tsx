@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { CodiaProvider, useCodia } from '../context/CodiaContext';
 import { LoginView } from '../components/login/LoginView';
 import { AdminLayout } from '../components/layout/AdminLayout';
@@ -16,11 +16,10 @@ import { ReportsView } from '../components/reports/ReportsView';
 import { SettingsView } from '../components/settings/SettingsView';
 
 function AppContent() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Default logged in for fast demo access, with login view toggle available
-  const { activeTab } = useCodia();
+  const { activeTab, currentUser } = useCodia();
 
-  if (!isAuthenticated) {
-    return <LoginView onLoginSuccess={() => setIsAuthenticated(true)} />;
+  if (!currentUser) {
+    return <LoginView />;
   }
 
   const renderActiveView = () => {
@@ -33,7 +32,6 @@ function AppContent() {
         return <InventoryView />;
       case 'empleados':
         return <EmployeesView />;
-      case 'finances':
       case 'finanzas':
         return <FinancesView />;
       case 'cliente_consentido':

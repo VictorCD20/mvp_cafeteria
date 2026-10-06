@@ -3,10 +3,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCodia } from '../../context/CodiaContext';
 import { PageHeader } from '../ui/PageHeader';
-import { Bot, Send, User, ExternalLink, RefreshCcw } from 'lucide-react';
+import { Bot, Send, User, ExternalLink } from 'lucide-react';
 
 export const BotView = () => {
-  const { botMessages, sendBotMessage, setActiveTab, setSubTab } = useCodia();
+  const { botMessages, sendBotMessage, setActiveTab } = useCodia();
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -96,8 +96,7 @@ export const BotView = () => {
                   {msg.actionableLink && (
                     <button
                       onClick={() => {
-                        setActiveTab(msg.actionableLink!.tab);
-                        setSubTab(msg.actionableLink!.subTab || '');
+                        setActiveTab(msg.actionableLink!.tab, msg.actionableLink!.subTab);
                       }}
                       className="inline-flex items-center space-x-1.5 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 border border-blue-200 dark:border-blue-800 text-[11px] font-bold px-3 py-1.5 rounded-xl transition"
                     >

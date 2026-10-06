@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
-import { Client, Promotion } from '../../types';
+import { promotionsForClient } from '../../lib/promotions';
 import { PageHeader } from '../ui/PageHeader';
 import { Bell, Coffee, Gift, QrCode, ScanLine, Smartphone, Store, UserPlus } from 'lucide-react';
 
@@ -43,24 +43,16 @@ const DemoQr = ({ value }: { value: string }) => {
   );
 };
 
-const promoForClient = (promo: Promotion, client: Client) => {
-  if (!promo.active) return false;
-  if (promo.audience === 'todos') return true;
-  if (promo.audience === 'frecuentes') return client.tier !== 'Nuevo';
-  if (promo.audience === 'nuevos') return client.tier === 'Nuevo';
-  if (promo.audience === 'proximos_recompensa') return client.stampsGoal - client.stamps <= 2 || client.rewardsAvailable > 0;
-  return false;
-};
-
 interface CustomerViewProps {
   isStandalonePublic?: boolean;
 }
 
 export const CustomerView: React.FC<CustomerViewProps> = ({ isStandalonePublic = false }) => {
-  const { clients, promotions, addClient, addStampsToClient, redeemReward, config } = useCodia();
+  const { clients, promotions, addClient, addStampsToClient, redeemReward, config, subTab, setSubTab } = useCodia();
 
-  const [screen, setScreen] = useState<PhoneScreen>('poster');
-  const [clientId, setClientId] = useState<string>('');
+  // Si la URL ya trae un cliente (?tab=vista_cliente&sub=cli-…), se abre directamente su tarjeta.
+  const [screen, setScreen] = useState<PhoneScreen>(() => (isStandalonePublic || !subTab ? 'poster' : 'tarjeta'));
+  const [localClientId, setLocalClientId] = useState<string>('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [privacy, setPrivacy] = useState(false);
@@ -68,8 +60,13 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ isStandalonePublic =
   const [notification, setNotification] = useState<string | null>(null);
   const [promoToSend, setPromoToSend] = useState<string>('');
 
+  // En la administración, el cliente abierto se guarda en la URL (?tab=vista_cliente&sub=cli-1);
+  // así el enlace "Ver tarjeta" desde Cliente Consentido abre directamente su tarjeta.
+  const clientId = isStandalonePublic ? localClientId : subTab;
+  const selectClient = (id: string) => (isStandalonePublic ? setLocalClientId(id) : setSubTab(id));
+
   const client = clients.find((c) => c.id === clientId);
-  const clientPromos = client ? promotions.filter((p) => promoForClient(p, client)) : [];
+  const clientPromos = promotionsForClient(promotions, client);
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +80,7 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ isStandalonePublic =
     if (Object.keys(nextErrors).length > 0) return;
 
     const created = addClient({ name: name.trim(), email: '', phone: cleanPhone });
-    setClientId(created.id);
+    selectClient(created.id);
     setName('');
     setPhone('');
     setPrivacy(false);
@@ -91,7 +88,7 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ isStandalonePublic =
   };
 
   const openExisting = (id: string) => {
-    setClientId(id);
+    selectClient(id);
     setScreen(id ? 'tarjeta' : 'poster');
     setNotification(null);
   };

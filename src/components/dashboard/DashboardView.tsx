@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
 import { SectionCard } from '../ui/PageHeader';
+import { latestAttendanceByEmployee } from '../../lib/attendance';
 import {
   TrendingUp,
   TrendingDown,
@@ -53,29 +54,29 @@ const LinkButton = ({ label, onClick }: { label: string; onClick: () => void }) 
 );
 
 export const DashboardView = () => {
-  const { sales, expenses, attendance, employees, ingredients, clients, setActiveTab, setSubTab } = useCodia();
+  const { sales, expenses, attendance, employees, ingredients, clients, setActiveTab, currentUser } = useCodia();
   const [showAllStaff, setShowAllStaff] = useState(false);
 
-  const goTo = (tab: string, sub?: string) => {
-    setActiveTab(tab);
-    setSubTab(sub || '');
-  };
+  const goTo = (tab: string, sub?: string) => setActiveTab(tab, sub);
 
   // Métricas
   const ticketSales = sales.filter((s) => !s.isShiftSummary);
   const totalSalesToday = ticketSales.reduce((acc, s) => acc + s.total, 0);
   const totalExpensesToday = expenses.reduce((acc, e) => acc + e.total, 0);
 
-  const presentCount = attendance.filter((a) => a.status === 'puntual' || a.status === 'retardo').length;
-  const lateCount = attendance.filter((a) => a.status === 'retardo').length;
-  const absentCount = attendance.filter((a) => a.status === 'ausente').length;
+  // Un registro por empleado (el más reciente), para no contar dos veces a quien checó varias veces.
+  const latestAttendance = latestAttendanceByEmployee(attendance);
+  const todayAttendance = employees.map((e) => latestAttendance.get(e.id)).filter((a) => a !== undefined);
+  const presentCount = todayAttendance.filter((a) => a.status === 'puntual' || a.status === 'retardo').length;
+  const lateCount = todayAttendance.filter((a) => a.status === 'retardo').length;
+  const absentCount = todayAttendance.filter((a) => a.status === 'ausente').length;
 
   const lowStockItems = ingredients.filter((i) => i.currentStock <= i.minStock);
   const clientsWithRewards = clients.filter((c) => c.rewardsAvailable > 0);
   const rewardsAvailableCount = clientsWithRewards.length;
 
   // Asistencia: primero quien requiere atención; el resto se despliega bajo demanda.
-  const staff = employees.map((emp) => ({ emp, att: attendance.find((a) => a.employeeId === emp.id) }));
+  const staff = employees.map((emp) => ({ emp, att: latestAttendance.get(emp.id) }));
   const staffNeedingAttention = staff.filter(({ att }) => !att || att.status !== 'puntual');
   const staffOnTime = staff.filter(({ att }) => att?.status === 'puntual');
 
@@ -112,7 +113,7 @@ export const DashboardView = () => {
       label: 'Recompensas listas',
       value: String(rewardsAvailableCount),
       unit: '',
-      caption: 'Clientes listos para canje en Wallet',
+      caption: 'Clientes listos para canje',
       icon: Gift,
       tone: 'text-purple-500 bg-purple-500/10'
     }
@@ -127,7 +128,7 @@ export const DashboardView = () => {
         <div>
           <div className="text-xs font-semibold text-blue-500 uppercase tracking-wide mb-2">Resumen operativo del día</div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white" suppressHydrationWarning>
-            ¡{greetingFor(now)}, Laura!
+            ¡{greetingFor(now)}, {currentUser?.name.split(' ')[0] ?? 'equipo'}!
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2" suppressHydrationWarning>
             {todayLabel} · Aquí está la visión general de la cafetería en tiempo real.
@@ -240,7 +241,7 @@ export const DashboardView = () => {
                   )}
                 </div>
               </div>
-              <LinkButton label="Ver clientes" onClick={() => goTo('cliente_consentido', 'wallet')} />
+              <LinkButton label="Ver recompensas" onClick={() => goTo('cliente_consentido', 'recompensas')} />
             </div>
           </div>
         </SectionCard>
@@ -253,15 +254,15 @@ export const DashboardView = () => {
             </div>
             <h2 className="text-lg font-semibold text-purple-900 mt-3">Fidelización de clientes</h2>
             <p className="text-sm text-purple-700 mt-2 leading-relaxed">
-              {clients.length} clientes registrados en la wallet simulada.
+              {clients.length} clientes con tarjeta digital de sellos.
             </p>
           </div>
           <div className="space-y-2 mt-6">
             <button
-              onClick={() => goTo('cliente_consentido', 'wallet')}
+              onClick={() => goTo('vista_cliente')}
               className="w-full bg-purple-600 text-white hover:bg-purple-700 text-xs font-semibold py-2.5 rounded-lg transition-colors"
             >
-              Abrir Wallet y tarjetas
+              Abrir tarjetas (vista del cliente)
             </button>
             <button
               onClick={() => goTo('cliente_consentido', 'promociones')}

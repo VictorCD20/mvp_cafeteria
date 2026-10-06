@@ -4,17 +4,14 @@ import React, { useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
 import {
   BarChart3,
-  Calendar,
   Download,
   TrendingUp,
   Users,
-  Package,
-  Heart,
   FileSpreadsheet
 } from 'lucide-react';
 
 export const ReportsView = () => {
-  const { sales, expenses, employees, ingredients, clients, showToast } = useCodia();
+  const { sales, expenses, employees, showToast } = useCodia();
   const [period, setPeriod] = useState<'diario' | 'semanal' | 'mensual'>('diario');
 
   const totalSales = sales.reduce((acc, s) => acc + s.total, 0);

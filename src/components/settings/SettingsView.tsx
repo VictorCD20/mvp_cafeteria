@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
-import { Settings, Building, Clock, Heart, Save } from 'lucide-react';
+import { Settings, Building, Clock, Save } from 'lucide-react';
 
 export const SettingsView = () => {
   const { config, updateConfig } = useCodia();

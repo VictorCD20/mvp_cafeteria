@@ -14,22 +14,25 @@ Prototipo navegable de un sistema de gestión para una cafetería (1 sucursal): 
 ## Stack y estructura
 - Next.js 16 (App Router) + React 19 + TypeScript + Tailwind 4. Sin backend: estado en memoria (`src/context/CodiaContext.tsx`) cargado de `src/data/seedData.ts`; se reinicia al recargar.
 - `src/app/page.tsx` cambia de módulo con `activeTab` (no hay rutas por módulo).
-- `src/components/<modulo>/` vistas · `src/lib/` reglas de negocio puras (promociones, inventario) · `src/types/` modelos.
+- `src/components/<modulo>/` vistas · `src/lib/` reglas de negocio puras (promociones, inventario, fechas, asistencia, permisos) · `src/types/` modelos.
+- Acceso por PIN por empleado con roles de acceso (`AccessRole` + `Permission` en `src/lib/permissions.ts`); `can(permiso)` decide qué ve cada usuario.
 
 ## Comandos
 - `npm run dev` (http://localhost:3000) · `npx tsc --noEmit` · `npx eslint src` · `npm run build`
 
 ## Reglas de dominio / trampas
-- Fechas y "viernes" en hora de México (`America/Mexico_City`), nunca UTC.
+- Fechas y horas en hora de México (`src/lib/dates.ts`), nunca UTC (`toISOString`, `getDay`, etc.).
 - Sellos: la meta es `stampsGoal`; al llegarla el contador vuelve a 0 y suma `rewardsAvailable`. Ningún cliente semilla debe quedar en meta/meta.
-- Promociones se calculan solo en `src/lib/promotions.ts` (`quoteSale`); el POS y `registerSale` usan la misma función.
+- Promociones se calculan solo en `src/lib/promotions.ts` (`quoteSale`, `promotionsForClient`, `matchesAudience`); el POS, `registerSale` y la vista del cliente usan la misma lógica.
+- Asistencia: "hoy" es el registro más reciente por empleado (`latestAttendanceByEmployee`); retardo = horario del empleado + tolerancia (`checkInStatus`).
+- Permisos: cada módulo/acción se protege con `can(permiso)`; los roles se administran desde Empleados → Roles. Siempre debe existir una persona activa con permiso `usuarios`.
 - No se vende si faltan insumos (`src/lib/inventory.ts`). No mutar objetos del estado.
 - Ventas `isShiftSummary` son cortes de días previos: cuentan en finanzas/reportes, no en "ventas del día" ni en ticket promedio.
 - Integraciones (Hikvision, PAC, Google Wallet, IA) son simuladas; decirlo en la demo.
 
 ## Forma de trabajar
 - Plan antes de código; un cambio de lógica por vez y volver a probar lo anterior.
-- Rama de trabajo `ajustes-demo`. El push está bloqueado hasta que Kevin apruebe.
+- Trabajar en ramas de funcionalidad (`roles-wallet-correcciones` para los cambios actuales). El push está bloqueado hasta que Kevin apruebe.
 
 ## Límites
 - ✅ Siempre: leer, editar en la rama de trabajo, correr tsc/lint/build, probar en el navegador, actualizar MEMORY.md.

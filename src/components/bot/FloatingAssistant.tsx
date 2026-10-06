@@ -11,7 +11,7 @@ const quickPrompts = ['Ventas del día', '¿Quién faltó hoy?', 'Stock bajo'];
  * Comparte la conversación con la sección "Asistente CODIA" (mismo estado del contexto).
  */
 export const FloatingAssistant = () => {
-  const { activeTab, setActiveTab, setSubTab, botMessages, sendBotMessage } = useCodia();
+  const { activeTab, setActiveTab, botMessages, sendBotMessage, can } = useCodia();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
@@ -34,7 +34,7 @@ export const FloatingAssistant = () => {
   }, [open]);
 
   // En la sección del asistente ya está el chat completo.
-  if (activeTab === 'asistente') return null;
+  if (activeTab === 'asistente' || !can('asistente')) return null;
 
   // En el punto de venta el botón "Confirmar venta" está abajo a la derecha: ahí el asistente se mueve a la izquierda.
   const side = activeTab === 'ventas' ? 'left-[18.5rem]' : 'right-6';
@@ -110,8 +110,7 @@ export const FloatingAssistant = () => {
                   {msg.actionableLink && (
                     <button
                       onClick={() => {
-                        setActiveTab(msg.actionableLink!.tab);
-                        setSubTab(msg.actionableLink!.subTab || '');
+                        setActiveTab(msg.actionableLink!.tab, msg.actionableLink!.subTab);
                       }}
                       className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline"
                     >

@@ -2,8 +2,11 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
+  AccessRole,
   Employee,
   Ingredient,
+  ModuleId,
+  Permission,
   Product,
   Recipe,
   Sale,
@@ -20,6 +23,7 @@ import {
 
 import {
   initialConfig,
+  initialRoles,
   initialEmployees,
   initialIngredients,
   initialProducts,
@@ -31,8 +35,13 @@ import {
   initialExpenses,
   initialMovements
 } from '../data/seedData';
-import { quoteSale } from '../lib/promotions';
+import { promotionsForClient, quoteSale } from '../lib/promotions';
 import { findShortages, requiredIngredients } from '../lib/inventory';
+import { todayInMexico, timeInMexico } from '../lib/dates';
+import { checkInStatus, latestAttendanceByEmployee } from '../lib/attendance';
+import { homeTabFor, isModuleId, roleHasPermission } from '../lib/permissions';
+
+type ActionResult = { success: boolean; message: string };
 
 interface CodiaContextType {
   config: SystemConfig;
@@ -40,14 +49,26 @@ interface CodiaContextType {
   
   // Navigation State
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab: (tab: string, sub?: string) => void;
   subTab: string;
   setSubTab: (sub: string) => void;
+
+  // Session & Roles
+  currentUser: Employee | null;
+  currentRole: AccessRole | undefined;
+  can: (permission: Permission) => boolean;
+  login: (employeeId: string, pin: string) => boolean;
+  logout: () => void;
+  roles: AccessRole[];
+  addRole: (role: Omit<AccessRole, 'id' | 'isSystem'>) => ActionResult;
+  updateRole: (id: string, role: Partial<Omit<AccessRole, 'id' | 'isSystem'>>) => ActionResult;
+  deleteRole: (id: string) => ActionResult;
   
   // Employee & Attendance & Payroll
   employees: Employee[];
-  addEmployee: (emp: Omit<Employee, 'id' | 'code'>) => void;
-  updateEmployee: (id: string, emp: Partial<Employee>) => void;
+  addEmployee: (emp: Omit<Employee, 'id' | 'code'>) => ActionResult;
+  updateEmployee: (id: string, emp: Partial<Employee>) => ActionResult;
+  deleteEmployee: (id: string) => ActionResult;
   attendance: AttendanceRecord[];
   registerCheckIn: (employeeId: string, status?: 'puntual' | 'retardo') => void;
   registerCheckOut: (employeeId: string) => void;
@@ -105,41 +126,36 @@ const CodiaContext = createContext<CodiaContextType | undefined>(undefined);
 
 export const CodiaProvider = ({ children }: { children: ReactNode }) => {
   const [config, setConfig] = useState<SystemConfig>(initialConfig);
-  const [activeTab, setActiveTabState] = useState<string>('inicio');
+  const [activeTabState, setActiveTabState] = useState<string>('inicio');
   const [subTab, setSubTabState] = useState<string>('');
+  const [roles, setRoles] = useState<AccessRole[]>(initialRoles);
+  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  const validTabs = [
-    'inicio',
-    'ventas',
-    'inventario',
-    'empleados',
-    'finances',
-    'finanzas',
-    'cliente_consentido',
-    'vista_cliente',
-    'asistente',
-    'reportes',
-    'configuracion'
-  ];
+  // Sesión: el rol del usuario decide qué módulos existen para él.
+  const currentUser = employees.find((e) => e.id === currentUserId && e.status === 'activo') ?? null;
+  const currentRole = currentUser ? roles.find((r) => r.id === currentUser.accessRoleId) : undefined;
+  const can = (permission: Permission) => roleHasPermission(currentRole, permission);
+  const canOpen = (tab: string) => isModuleId(tab) && can(tab);
+  // Si la URL o un enlace apunta a un módulo sin permiso, se muestra la pantalla de inicio del rol.
+  const activeTab: ModuleId = canOpen(activeTabState) ? (activeTabState as ModuleId) : homeTabFor(currentRole);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const syncFromUrl = () => {
       const params = new URLSearchParams(window.location.search);
-      const tabParam = params.get('tab');
+      const rawTab = params.get('tab');
+      const tabParam = rawTab === 'finances' ? 'finanzas' : rawTab;
       const subParam = params.get('subTab') || params.get('sub') || '';
 
-      if (tabParam && validTabs.includes(tabParam)) {
+      if (tabParam && isModuleId(tabParam)) {
         setActiveTabState(tabParam);
         setSubTabState(subParam);
-      } else if (!tabParam) {
-        setActiveTabState('inicio');
-        setSubTabState('');
       } else {
-        // URL inválida -> destino seguro inicio
         setActiveTabState('inicio');
         setSubTabState('');
-        window.history.replaceState({}, '', window.location.pathname);
+        // URL inválida -> destino seguro inicio
+        if (tabParam) window.history.replaceState({}, '', window.location.pathname);
       }
     };
 
@@ -164,11 +180,13 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const setActiveTab = (tab: string) => {
-    const targetTab = validTabs.includes(tab) ? tab : 'inicio';
+  // Cambia de módulo y (opcional) de subpestaña en un solo paso, para que la URL quede completa.
+  const setActiveTab = (tab: string, sub = '') => {
+    const targetTab = canOpen(tab) ? tab : homeTabFor(currentRole);
+    const targetSub = targetTab === tab ? sub : '';
     setActiveTabState(targetTab);
-    setSubTabState('');
-    updateUrlNav(targetTab, '');
+    setSubTabState(targetSub);
+    updateUrlNav(targetTab, targetSub);
   };
 
   const setSubTab = (sub: string) => {
@@ -176,7 +194,53 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
     updateUrlNav(activeTab, sub);
   };
 
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
+  const login = (employeeId: string, pin: string) => {
+    const emp = employees.find((e) => e.id === employeeId && e.status === 'activo');
+    if (!emp || emp.pin !== pin) return false;
+    setCurrentUserId(emp.id);
+    showToast(`Hola, ${emp.name.split(' ')[0]}. Sesión iniciada como ${roles.find((r) => r.id === emp.accessRoleId)?.name ?? 'usuario'}`);
+    return true;
+  };
+
+  const logout = () => {
+    setCurrentUserId(null);
+    setActiveTabState('inicio');
+    setSubTabState('');
+    if (typeof window !== 'undefined') window.history.replaceState({}, '', window.location.pathname);
+  };
+
+  // Roles
+  const rolesWithUserAdmin = (list: AccessRole[]) => list.filter((r) => r.permissions.includes('usuarios')).map((r) => r.id);
+
+  const addRole = (roleData: Omit<AccessRole, 'id' | 'isSystem'>): ActionResult => {
+    const name = roleData.name.trim();
+    if (!name) return { success: false, message: 'El rol necesita un nombre.' };
+    if (roles.some((r) => r.name.toLowerCase() === name.toLowerCase())) return { success: false, message: 'Ya existe un rol con ese nombre.' };
+    if (roleData.permissions.length === 0) return { success: false, message: 'Elige al menos un permiso.' };
+    setRoles((prev) => [...prev, { ...roleData, name, id: `role-${Date.now()}` }]);
+    showToast(`Rol "${name}" creado`);
+    return { success: true, message: 'Rol creado' };
+  };
+
+  const updateRole = (id: string, roleData: Partial<Omit<AccessRole, 'id' | 'isSystem'>>): ActionResult => {
+    const role = roles.find((r) => r.id === id);
+    if (!role) return { success: false, message: 'El rol no existe.' };
+    if (role.isSystem) return { success: false, message: `El rol ${role.name} es del sistema y no se puede modificar.` };
+    if (roleData.permissions && roleData.permissions.length === 0) return { success: false, message: 'Un rol debe tener al menos un permiso.' };
+    setRoles((prev) => prev.map((r) => (r.id === id ? { ...r, ...roleData } : r)));
+    return { success: true, message: 'Rol actualizado' };
+  };
+
+  const deleteRole = (id: string): ActionResult => {
+    const role = roles.find((r) => r.id === id);
+    if (!role) return { success: false, message: 'El rol no existe.' };
+    if (role.isSystem) return { success: false, message: `El rol ${role.name} es del sistema y no se puede eliminar.` };
+    const members = employees.filter((e) => e.accessRoleId === id).length;
+    if (members > 0) return { success: false, message: `Reasigna primero a las ${members} persona(s) con este rol.` };
+    setRoles((prev) => prev.filter((r) => r.id !== id));
+    showToast(`Rol "${role.name}" eliminado`);
+    return { success: true, message: 'Rol eliminado' };
+  };
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialAttendance);
   const [ingredients, setIngredients] = useState<Ingredient[]>(initialIngredients);
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -193,7 +257,7 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
     {
       id: 'bot-1',
       sender: 'bot',
-      text: '¡Hola Laura! Soy tu Asistente Virtual CODIA. Puedo responder preguntas sobre ventas del día, inventario bajo, retardos y faltas, gastos, clientes con recompensa y promociones.',
+      text: '¡Hola! Soy tu Asistente Virtual CODIA. Puedo responder preguntas sobre ventas del día, inventario bajo, retardos y faltas, gastos, clientes con recompensa y promociones.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -211,66 +275,99 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Employees
-  const addEmployee = (empData: Omit<Employee, 'id' | 'code'>) => {
-    const id = `emp-${Date.now()}`;
-    const code = `EMP-00${employees.length + 1}`;
-    const newEmp: Employee = { id, code, ...empData };
+  const validateEmployee = (data: Partial<Employee>, exceptId?: string): string | null => {
+    if (data.name !== undefined && data.name.trim().length < 3) return 'Escribe el nombre completo.';
+    if (data.pin !== undefined) {
+      if (!/^\d{4}$/.test(data.pin)) return 'El PIN debe tener 4 dígitos.';
+      if (employees.some((e) => e.id !== exceptId && e.pin === data.pin)) return 'Ese PIN ya lo usa otra persona.';
+    }
+    if (data.accessRoleId !== undefined && !roles.some((r) => r.id === data.accessRoleId)) return 'Elige un rol de acceso válido.';
+    return null;
+  };
+
+  /** Siempre debe quedar al menos una persona activa que pueda administrar personal y roles. */
+  const keepsAnAdmin = (next: Employee[]) => {
+    const adminRoles = rolesWithUserAdmin(roles);
+    return next.some((e) => e.status === 'activo' && adminRoles.includes(e.accessRoleId));
+  };
+
+  const addEmployee = (empData: Omit<Employee, 'id' | 'code'>): ActionResult => {
+    const error = validateEmployee(empData);
+    if (error) return { success: false, message: error };
+    const lastNumber = Math.max(0, ...employees.map((e) => Number(e.code.replace('EMP-', '')) || 0));
+    const code = `EMP-${String(lastNumber + 1).padStart(3, '0')}`;
+    const newEmp: Employee = { ...empData, id: `emp-${Date.now()}`, code, name: empData.name.trim() };
     setEmployees((prev) => [...prev, newEmp]);
     showToast(`Empleado ${newEmp.name} registrado con éxito`);
+    return { success: true, message: 'Empleado registrado' };
   };
 
-  const updateEmployee = (id: string, empData: Partial<Employee>) => {
-    setEmployees((prev) => prev.map((e) => (e.id === id ? { ...e, ...empData } : e)));
+  const updateEmployee = (id: string, empData: Partial<Employee>): ActionResult => {
+    const error = validateEmployee(empData, id);
+    if (error) return { success: false, message: error };
+    const next = employees.map((e) => (e.id === id ? { ...e, ...empData } : e));
+    if (!keepsAnAdmin(next)) return { success: false, message: 'Debe quedar al menos una persona activa que administre el personal.' };
+    setEmployees(next);
     showToast('Datos de empleado actualizados');
+    return { success: true, message: 'Empleado actualizado' };
   };
 
-  // Attendance
+  const deleteEmployee = (id: string): ActionResult => {
+    const emp = employees.find((e) => e.id === id);
+    if (!emp) return { success: false, message: 'El empleado no existe.' };
+    if (id === currentUserId) return { success: false, message: 'No puedes eliminar tu propio usuario.' };
+    const next = employees.filter((e) => e.id !== id);
+    if (!keepsAnAdmin(next)) return { success: false, message: 'Debe quedar al menos una persona activa que administre el personal.' };
+    setEmployees(next);
+    showToast(`Empleado ${emp.name} eliminado`);
+    return { success: true, message: 'Empleado eliminado' };
+  };
+
+  // Attendance (fecha y hora siempre en hora de México)
   const registerCheckIn = (employeeId: string, statusOverride?: 'puntual' | 'retardo') => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    
+    const todayStr = todayInMexico();
+    const timeStr = timeInMexico();
+    const emp = employees.find((e) => e.id === employeeId);
+    const status = statusOverride || checkInStatus(timeStr, emp?.schedule ?? '', config.lateToleranceMinutes);
+
     setAttendance((prev) => {
       const existingIndex = prev.findIndex((a) => a.employeeId === employeeId && a.date === todayStr);
-      const emp = employees.find((e) => e.id === employeeId);
-      const status = statusOverride || (timeStr > '07:15' ? 'retardo' : 'puntual');
-
       if (existingIndex >= 0) {
         const copy = [...prev];
-        copy[existingIndex] = {
-          ...copy[existingIndex],
-          checkIn: timeStr,
-          status: status
-        };
+        copy[existingIndex] = { ...copy[existingIndex], checkIn: timeStr, status, notes: undefined };
         return copy;
-      } else {
-        return [
-          ...prev,
-          {
-            id: `att-${Date.now()}`,
-            employeeId,
-            date: todayStr,
-            checkIn: timeStr,
-            status,
-            deviceSimulated: 'Hikvision DS-K1T804AM'
-          }
-        ];
       }
+      return [
+        ...prev,
+        {
+          id: `att-${Date.now()}`,
+          employeeId,
+          date: todayStr,
+          checkIn: timeStr,
+          status,
+          deviceSimulated: 'Hikvision DS-K1T804AM'
+        }
+      ];
     });
-    const emp = employees.find((e) => e.id === employeeId);
-    showToast(`Asistencia entrada registrada para ${emp?.name || 'Empleado'}`);
+    showToast(`Entrada registrada para ${emp?.name || 'Empleado'} a las ${timeStr} (${status})`);
   };
 
   const registerCheckOut = (employeeId: string) => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    const todayStr = todayInMexico();
+    const timeStr = timeInMexico();
+    const hasEntry = attendance.some((a) => a.employeeId === employeeId && a.date === todayStr && a.checkIn);
+    if (!hasEntry) {
+      showToast('Primero registra la entrada de hoy');
+      return;
+    }
     setAttendance((prev) =>
       prev.map((a) => (a.employeeId === employeeId && a.date === todayStr ? { ...a, checkOut: timeStr } : a))
     );
-    showToast(`Chequeo de salida registrado`);
+    showToast(`Salida registrada a las ${timeStr}`);
   };
 
   const justifyAbsence = (employeeId: string, notes: string) => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = todayInMexico();
     setAttendance((prev) => {
       const existing = prev.find((a) => a.employeeId === employeeId && a.date === todayStr);
       if (existing) {
@@ -491,7 +588,7 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
     // Simulate realistic OCR extraction delay
     await new Promise((res) => setTimeout(res, 1200));
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = todayInMexico();
     const sampleMockData: Record<string, Omit<Expense, 'id' | 'folio'>> = {
       ticket_cafe: {
         date: todayStr,
@@ -607,10 +704,13 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
       showToast('El cliente no tiene recompensas disponibles');
       return false;
     }
+    // Promociones con producto de regalo se entregan junto con la recompensa (se evalúan antes de descontarla).
+    const gifts = promotionsForClient(promotions, client).filter((p) => p.freeItem);
     setClients((prev) =>
       prev.map((c) => (c.id === clientId ? { ...c, rewardsAvailable: c.rewardsAvailable - 1 } : c))
     );
-    showToast(`Recompensa canjeada para ${client.name}`);
+    const giftText = gifts.length > 0 ? ` + regalo: ${gifts.map((g) => `${g.freeItem} (${g.code})`).join(', ')}` : '';
+    showToast(`Recompensa canjeada para ${client.name}${giftText}`);
     return true;
   };
 
@@ -645,6 +745,9 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
     const answers: string[] = [];
     let link: { label: string; tab: string; subTab?: string } | undefined = undefined;
     const empName = (id: string) => employees.find((e) => e.id === id)?.name ?? 'Empleado';
+    const todayAttendance = Array.from(latestAttendanceByEmployee(attendance).values()).filter((a) =>
+      employees.some((e) => e.id === a.employeeId)
+    );
 
     if (has('vend', 'venta', 'ingreso', 'cobr', 'factur')) {
       const tickets = sales.filter((s) => !s.isShiftSummary);
@@ -653,12 +756,12 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
       link = { label: 'Ir al Punto de Venta (POS)', tab: 'ventas' };
     }
     if (has('tarde', 'retard', 'llego', 'llegaron', 'puntual')) {
-      const late = attendance.filter((a) => a.status === 'retardo').map((a) => `${empName(a.employeeId)} (${a.checkIn})`);
+      const late = todayAttendance.filter((a) => a.status === 'retardo').map((a) => `${empName(a.employeeId)} (${a.checkIn})`);
       answers.push(late.length > 0 ? `Llegaron tarde: ${late.join(', ')}.` : 'Nadie llegó tarde hoy.');
       link = link ?? { label: 'Ver Asistencia y Checador', tab: 'empleados', subTab: 'asistencia' };
     }
     if (has('falt', 'ausen', 'vino', 'asistencia')) {
-      const absents = attendance
+      const absents = todayAttendance
         .filter((a) => a.status === 'ausente' || a.status === 'justificado')
         .map((a) => `${empName(a.employeeId)} (${a.status})`);
       answers.push(absents.length > 0 ? `Ausencias de hoy: ${absents.join(', ')}.` : 'No hay faltas reportadas hoy.');
@@ -685,7 +788,7 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
           ? `Hay ${clients.length} clientes registrados; con recompensa lista: ${withRewards.join(', ')}.`
           : `Hay ${clients.length} clientes registrados y ninguno tiene recompensa pendiente.`
       );
-      link = link ?? { label: 'Ver Wallet y Tarjetas', tab: 'cliente_consentido', subTab: 'wallet' };
+      link = link ?? { label: 'Ver recompensas por canjear', tab: 'cliente_consentido', subTab: 'recompensas' };
     }
     if (has('promo', 'descuento', '2x1', 'oferta')) {
       const active = promotions.filter((p) => p.active).map((p) => `${p.title} (${p.code})`);
@@ -714,6 +817,7 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
 
   const resetToSeedData = () => {
     setConfig(initialConfig);
+    setRoles(initialRoles);
     setEmployees(initialEmployees);
     setAttendance(initialAttendance);
     setIngredients(initialIngredients);
@@ -737,9 +841,19 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
         setActiveTab,
         subTab,
         setSubTab,
+        currentUser,
+        currentRole,
+        can,
+        login,
+        logout,
+        roles,
+        addRole,
+        updateRole,
+        deleteRole,
         employees,
         addEmployee,
         updateEmployee,
+        deleteEmployee,
         attendance,
         registerCheckIn,
         registerCheckOut,

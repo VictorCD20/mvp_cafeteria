@@ -1,4 +1,7 @@
 import { Client, Product, Promotion } from '../types';
+import { daysAgoInMexico, isFridayInMexico, todayInMexico } from './dates';
+
+export { isFridayInMexico, todayInMexico };
 
 export interface CartLine {
   product: Product;
@@ -19,38 +22,41 @@ export interface SaleQuote {
   applied: AppliedPromotion[];
 }
 
-const TIME_ZONE = 'America/Mexico_City';
+/** Días sin visita para considerar a un cliente "inactivo". */
+export const INACTIVE_AFTER_DAYS = 30;
+/** Sellos faltantes para considerar a un cliente "próximo a recompensa". */
+export const NEAR_REWARD_STAMPS = 2;
 
-/** Fecha de hoy en hora de México (YYYY-MM-DD), no UTC. */
-export const todayInMexico = (date: Date = new Date()): string =>
-  new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE }).format(date);
+export const isPromotionValid = (promo: Promotion, today: string = todayInMexico()) =>
+  promo.active && promo.validUntil >= today;
 
-/** true si la fecha cae en viernes en hora de México. */
-export const isFridayInMexico = (date: Date = new Date()): boolean =>
-  new Intl.DateTimeFormat('en-US', { timeZone: TIME_ZONE, weekday: 'short' }).format(date) === 'Fri';
-
-const isPromotionValid = (promo: Promotion, today: string) => promo.active && promo.validUntil >= today;
-
-const matchesAudience = (promo: Promotion, client?: Client) => {
+/** ¿La promoción va dirigida a este cliente? Fuente única para el POS y la vista del cliente. */
+export const matchesAudience = (promo: Promotion, client?: Client, date: Date = new Date()) => {
+  if (promo.audience === 'todos') return true;
+  if (!client) return false;
   switch (promo.audience) {
-    case 'todos':
-      return true;
     case 'frecuentes':
-      return Boolean(client && (client.tier === 'Frecuente' || client.tier === 'VIP Consentido'));
+      return client.tier === 'Frecuente' || client.tier === 'VIP Consentido';
     case 'nuevos':
-      return Boolean(client && client.tier === 'Nuevo');
+      return client.tier === 'Nuevo';
+    case 'proximos_recompensa':
+      return client.stampsGoal - client.stamps <= NEAR_REWARD_STAMPS || client.rewardsAvailable > 0;
+    case 'inactivos':
+      return client.lastVisit.slice(0, 10) < daysAgoInMexico(INACTIVE_AFTER_DAYS, date);
     default:
       return false;
   }
 };
 
-const MIN_TOTAL_DOUBLE_STAMP = 100;
+/** Promociones vigentes que le aplican a un cliente. */
+export const promotionsForClient = (promotions: Promotion[], client?: Client, date: Date = new Date()) =>
+  promotions.filter((p) => isPromotionValid(p, todayInMexico(date)) && matchesAudience(p, client, date));
 
 /**
  * Calcula el total de una venta aplicando las promociones vigentes.
- * - Descuento por porcentaje: aplica solo a bebidas frías (cafe_frio) del público objetivo.
- * - Sellos extra (bonusStamps): aplica los viernes (hora de México) en compras mayores a $100.
- * Los sellos solo se suman si hay un cliente asociado.
+ * - Descuento por porcentaje: sobre las categorías de `appliesTo` (o todo el ticket si no se indican).
+ * - Sellos extra (bonusStamps): si hay cliente, respetando `fridayOnly` (hora de México) y `minPurchase`.
+ * - Producto de regalo (freeItem): se entrega al canjear la recompensa, no cambia el total.
  */
 export const quoteSale = (
   lines: CartLine[],
@@ -59,7 +65,6 @@ export const quoteSale = (
   options: { date?: Date; forceFriday?: boolean } = {}
 ): SaleQuote => {
   const date = options.date ?? new Date();
-  const today = todayInMexico(date);
   const friday = options.forceFriday || isFridayInMexico(date);
 
   const subtotal = lines.reduce((acc, l) => acc + l.product.price * l.quantity, 0);
@@ -67,24 +72,22 @@ export const quoteSale = (
   let stamps = client ? 1 : 0;
   const applied: AppliedPromotion[] = [];
 
-  promotions
-    .filter((p) => isPromotionValid(p, today) && matchesAudience(p, client))
-    .forEach((promo) => {
-      if (promo.discountPercentage) {
-        const coldTotal = lines
-          .filter((l) => l.product.category === 'cafe_frio')
-          .reduce((acc, l) => acc + l.product.price * l.quantity, 0);
-        const amount = Math.round((coldTotal * promo.discountPercentage) / 100);
-        if (amount > 0) {
-          discount += amount;
-          applied.push({ code: promo.code, title: promo.title, detail: `-$${amount} MXN` });
-        }
+  promotionsForClient(promotions, client, date).forEach((promo) => {
+    if (promo.discountPercentage) {
+      const base = lines
+        .filter((l) => !promo.appliesTo?.length || promo.appliesTo.includes(l.product.category))
+        .reduce((acc, l) => acc + l.product.price * l.quantity, 0);
+      const amount = Math.min(Math.round((base * promo.discountPercentage) / 100), subtotal - discount);
+      if (amount > 0) {
+        discount += amount;
+        applied.push({ code: promo.code, title: promo.title, detail: `-$${amount} MXN` });
       }
-      if (promo.bonusStamps && client && friday && subtotal > MIN_TOTAL_DOUBLE_STAMP) {
-        stamps += promo.bonusStamps;
-        applied.push({ code: promo.code, title: promo.title, detail: `+${promo.bonusStamps} sello extra` });
-      }
-    });
+    }
+    if (promo.bonusStamps && client && (!promo.fridayOnly || friday) && subtotal > (promo.minPurchase ?? 0)) {
+      stamps += promo.bonusStamps;
+      applied.push({ code: promo.code, title: promo.title, detail: `+${promo.bonusStamps} sello extra` });
+    }
+  });
 
   return { subtotal, discount, total: subtotal - discount, stamps, applied };
 };

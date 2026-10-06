@@ -13,12 +13,9 @@ import {
   CreditCard,
   Banknote,
   User,
-  CheckCircle,
   Receipt,
   Search,
-  Sparkles,
   ArrowRight,
-  Printer
 } from 'lucide-react';
 
 export const PosView = () => {
