@@ -1,5 +1,49 @@
 export type Role = 'administrador' | 'barista' | 'cajero' | 'cocina' | 'encargado';
 
+export type UserRole = 'superadmin' | 'administrador' | 'encargado' | 'empleado' | 'cliente';
+
+export type Permission =
+  | 'sales.create'
+  | 'sales.view_own'
+  | 'sales.view_branch'
+  | 'sales.cancel'
+  | 'sales.discount'
+  | 'cash.open'
+  | 'cash.close'
+  | 'cash.adjust'
+  | 'inventory.view'
+  | 'inventory.receive'
+  | 'inventory.count'
+  | 'inventory.adjust'
+  | 'inventory.waste'
+  | 'customers.create'
+  | 'customers.view'
+  | 'customers.view_own'
+  | 'loyalty.adjust'
+  | 'loyalty.redeem'
+  | 'loyalty.view_own'
+  | 'employees.view'
+  | 'employees.manage'
+  | 'attendance.review'
+  | 'reports.operational'
+  | 'reports.financial'
+  | 'settings.manage'
+  | 'users.manage'
+  | 'roles.manage'
+  | 'audit.view'
+  | '*';
+
+export interface ActiveUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  employeeId?: string;
+  clientId?: string;
+  avatar?: string;
+  branchId: string;
+}
+
 export interface Employee {
   id: string;
   code: string; // e.g. EMP-001
@@ -160,15 +204,81 @@ export interface SystemConfig {
   logoText: string;
 }
 
+export type InventoryMovementType =
+  | 'entrada'
+  | 'compra'
+  | 'consumo_venta'
+  | 'merma'
+  | 'ajuste_positivo'
+  | 'ajuste_negativo'
+  | 'devolucion'
+  | 'cancelacion'
+  | 'salida'
+  | 'ajuste'
+  | 'venta';
+
 export interface InventoryMovement {
   id: string;
   timestamp: string;
   ingredientId: string;
   ingredientName: string;
-  type: 'entrada' | 'salida' | 'ajuste' | 'venta';
+  type: InventoryMovementType;
   quantity: number;
   unit: string;
   reason: string;
+  responsibleUserId?: string;
+  responsibleUserName?: string;
+  saleFolio?: string;
+  costImpact?: number;
+}
+
+export type LoyaltyMovementType =
+  | 'sello_ganado'
+  | 'bonificacion'
+  | 'ajuste'
+  | 'canje'
+  | 'vencimiento'
+  | 'reversion';
+
+export interface LoyaltyMovement {
+  id: string;
+  timestamp: string;
+  clientId: string;
+  clientName: string;
+  type: LoyaltyMovementType;
+  stampsDelta: number;
+  rewardsDelta: number;
+  previousStamps: number;
+  newStamps: number;
+  previousRewards: number;
+  newRewards: number;
+  reason: string;
+  saleFolio?: string;
+  responsibleUserId: string;
+  responsibleUserName: string;
+}
+
+export type AuditActionType =
+  | 'descuento'
+  | 'merma'
+  | 'ajuste_inventario'
+  | 'cambio_rol'
+  | 'cancelacion'
+  | 'canje_recompensa'
+  | 'configuracion'
+  | 'modificacion_empleado';
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string;
+  action: AuditActionType;
+  description: string;
+  responsibleUserId: string;
+  responsibleUserName: string;
+  responsibleRole: UserRole;
+  targetEntity?: string;
+  targetId?: string;
+  details?: Record<string, any>;
 }
 
 export interface InvoiceSimulated {
@@ -190,3 +300,4 @@ export interface BotMessage {
   timestamp: string;
   actionableLink?: { label: string; tab: string; subTab?: string };
 }
+

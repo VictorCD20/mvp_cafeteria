@@ -1,0 +1,40 @@
+[
+  {
+    "id": "mov-1",
+    "timestamp": "2026-09-30 08:15",
+    "ingredientId": "ing-1",
+    "ingredientName": "Café Molido de Especialidad",
+    "type": "consumo_venta",
+    "quantity": 36,
+    "unit": "g",
+    "reason": "Venta VTA-1049 (2 Lattes)",
+    "saleFolio": "VTA-1049",
+    "responsibleUserId": "usr-admin",
+    "responsibleUserName": "Laura Méndez"
+  },
+  {
+    "id": "mov-2",
+    "timestamp": "2026-09-30 08:15",
+    "ingredientId": "ing-2",
+    "ingredientName": "Leche Entera Organica",
+    "type": "consumo_venta",
+    "quantity": 600,
+    "unit": "ml",
+    "reason": "Venta VTA-1049 (2 Lattes)",
+    "saleFolio": "VTA-1049",
+    "responsibleUserId": "usr-admin",
+    "responsibleUserName": "Laura Méndez"
+  },
+  {
+    "id": "mov-3",
+    "timestamp": "2026-09-30 09:00",
+    "ingredientId": "ing-5",
+    "ingredientName": "Vasos Medianos 12oz",
+    "type": "entrada",
+    "quantity": 50,
+    "unit": "pza",
+    "reason": "Ajuste de inventario recibido",
+    "responsibleUserId": "usr-admin",
+    "responsibleUserName": "Laura Méndez"
+  }
+]

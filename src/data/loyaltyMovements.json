@@ -1,0 +1,53 @@
+[
+  {
+    "id": "loy-mov-1",
+    "timestamp": "2026-09-28 09:30",
+    "clientId": "cli-1",
+    "clientName": "Mariana Ríos",
+    "type": "sello_ganado",
+    "stampsDelta": 1,
+    "rewardsDelta": 0,
+    "previousStamps": 6,
+    "newStamps": 7,
+    "previousRewards": 0,
+    "newRewards": 0,
+    "reason": "Compra en barra ticket VTA-1042",
+    "saleFolio": "VTA-1042",
+    "responsibleUserId": "usr-cajero",
+    "responsibleUserName": "Luis García"
+  },
+  {
+    "id": "loy-mov-2",
+    "timestamp": "2026-09-29 11:15",
+    "clientId": "cli-2",
+    "clientName": "Roberto Morales",
+    "type": "bonificacion",
+    "stampsDelta": 2,
+    "rewardsDelta": 0,
+    "previousStamps": 2,
+    "newStamps": 4,
+    "previousRewards": 0,
+    "newRewards": 0,
+    "reason": "Viernes de sellos dobles ticket VTA-1045",
+    "saleFolio": "VTA-1045",
+    "responsibleUserId": "usr-cajero",
+    "responsibleUserName": "Luis García"
+  },
+  {
+    "id": "loy-mov-3",
+    "timestamp": "2026-09-30 08:45",
+    "clientId": "cli-3",
+    "clientName": "Sofía Castro",
+    "type": "sello_ganado",
+    "stampsDelta": 1,
+    "rewardsDelta": 1,
+    "previousStamps": 7,
+    "newStamps": 0,
+    "previousRewards": 0,
+    "newRewards": 1,
+    "reason": "Meta de 8 sellos completada (ticket VTA-1049)",
+    "saleFolio": "VTA-1049",
+    "responsibleUserId": "usr-admin",
+    "responsibleUserName": "Laura Méndez"
+  }
+]

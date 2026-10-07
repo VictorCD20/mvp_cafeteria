@@ -1,0 +1,7 @@
+[
+  { "id": "cafe_caliente", "name": "Café Caliente", "icon": "Coffee" },
+  { "id": "cafe_frio", "name": "Café Frío y Frappés", "icon": "CupSoda" },
+  { "id": "te_infusiones", "name": "Té e Infusiones", "icon": "Flame" },
+  { "id": "reposteria", "name": "Repostería", "icon": "Cookie" },
+  { "id": "alimentos", "name": "Alimentos", "icon": "Utensils" }
+]

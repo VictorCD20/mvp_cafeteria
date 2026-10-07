@@ -25,6 +25,7 @@ export const LoyaltyView = () => {
     addClient,
     addStampsToClient,
     redeemReward,
+    loyaltyMovements,
     promotions,
     addPromotion,
     togglePromotion,
@@ -33,9 +34,9 @@ export const LoyaltyView = () => {
     setSubTab
   } = useCodia();
 
-  const activeSubTab: 'clientes' | 'wallet' | 'promociones' | 'recompensas' =
-    subTab === 'wallet' || subTab === 'promociones' || subTab === 'recompensas' ? subTab : 'clientes';
-  const setActiveSubTab = (tab: 'clientes' | 'wallet' | 'promociones' | 'recompensas') => setSubTab(tab);
+  const activeSubTab: 'clientes' | 'wallet' | 'promociones' | 'recompensas' | 'historial' =
+    subTab === 'wallet' || subTab === 'promociones' || subTab === 'recompensas' || subTab === 'historial' ? subTab : 'clientes';
+  const setActiveSubTab = (tab: 'clientes' | 'wallet' | 'promociones' | 'recompensas' | 'historial') => setSubTab(tab);
   const [selectedClientId, setSelectedClientId] = useState<string>(clients[0]?.id || '');
   const [search, setSearch] = useState('');
 
@@ -102,7 +103,7 @@ export const LoyaltyView = () => {
             <span>Cliente Consentido & Wallet Simulada</span>
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-2xl leading-relaxed">
-            Programa de fidelización por sellos digitales, wallet PWA simulada y promociones dirigidas.
+            Programa de fidelización por sellos digitales, wallet PWA simulada, recompensas y libro mayor de movimientos.
           </p>
         </div>
 
@@ -146,10 +147,21 @@ export const LoyaltyView = () => {
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            Recompensas (Canjes)
+            Recompensas ({clients.filter((c) => c.rewardsAvailable > 0).length})
+          </button>
+          <button
+            onClick={() => setActiveSubTab('historial')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition ${
+              activeSubTab === 'historial'
+                ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            Historial de Movimientos ({loyaltyMovements.length})
           </button>
         </div>
       </div>
+
 
       {/* TAB 1: CLIENTES LIST */}
       {activeSubTab === 'clientes' && (
@@ -485,8 +497,122 @@ export const LoyaltyView = () => {
         </div>
       )}
 
+      {/* TAB 5: HISTORIAL DE MOVIMIENTOS (LEDGER) */}
+      {activeSubTab === 'historial' && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm">
+                Libro Mayor de Movimientos de Fidelidad
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Trazabilidad detallada de sellos ganados, bonificaciones, canjes de recompensa y ajustes manuales con responsable.
+              </p>
+            </div>
+            <span className="text-xs font-mono bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 px-2.5 py-1 rounded-lg">
+              {loyaltyMovements.length} registro(s)
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-400 font-bold uppercase">
+                <tr>
+                  <th className="p-3">Fecha / Hora</th>
+                  <th className="p-3">Cliente</th>
+                  <th className="p-3">Tipo de Evento</th>
+                  <th className="p-3">Sellos (+/-)</th>
+                  <th className="p-3">Saldo Resultante</th>
+                  <th className="p-3">Motivo / Folio</th>
+                  <th className="p-3">Responsable</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {loyaltyMovements.map((mov) => {
+                  const getTypeBadge = () => {
+                    switch (mov.type) {
+                      case 'sello_ganado':
+                        return (
+                          <span className="bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold px-2 py-0.5 rounded text-[10px]">
+                            Sello Ganado
+                          </span>
+                        );
+                      case 'bonificacion':
+                        return (
+                          <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold px-2 py-0.5 rounded text-[10px]">
+                            Bonificación Doble
+                          </span>
+                        );
+                      case 'canje':
+                        return (
+                          <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded text-[10px]">
+                            Canje de Bebida
+                          </span>
+                        );
+                      case 'ajuste':
+                        return (
+                          <span className="bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold px-2 py-0.5 rounded text-[10px]">
+                            Ajuste Manual
+                          </span>
+                        );
+                      default:
+                        return (
+                          <span className="bg-slate-500/10 text-slate-600 font-bold px-2 py-0.5 rounded text-[10px]">
+                            {mov.type}
+                          </span>
+                        );
+                    }
+                  };
+
+                  return (
+                    <tr key={mov.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <td className="p-3 text-slate-500 font-mono text-[11px]">{mov.timestamp}</td>
+                      <td className="p-3 font-bold text-slate-900 dark:text-white">{mov.clientName}</td>
+                      <td className="p-3">{getTypeBadge()}</td>
+                      <td className="p-3 font-bold">
+                        {mov.stampsDelta > 0 ? (
+                          <span className="text-emerald-600 dark:text-emerald-400">+{mov.stampsDelta} sello(s)</span>
+                        ) : mov.rewardsDelta < 0 ? (
+                          <span className="text-rose-600 dark:text-rose-400">-1 recompensa</span>
+                        ) : (
+                          <span className="text-slate-500">0</span>
+                        )}
+                        {mov.rewardsDelta > 0 ? (
+                          <span className="block text-[10px] text-emerald-600 font-extrabold">
+                            +{mov.rewardsDelta} recompensa lista
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="p-3 text-slate-700 dark:text-slate-300 font-medium">
+                        {mov.newStamps}/{config.stampsPerReward} sellos
+                        {mov.newRewards > 0 ? (
+                          <span className="ml-1.5 text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 font-bold px-1.5 py-0.5 rounded">
+                            {mov.newRewards} cortesía
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="p-3 text-slate-600 dark:text-slate-400 font-medium">
+                        {mov.reason}
+                        {mov.saleFolio ? (
+                          <span className="ml-1 text-[10px] font-mono text-purple-600 dark:text-purple-400 font-bold">
+                            [{mov.saleFolio}]
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="p-3 text-slate-500 font-medium text-[11px]">
+                        {mov.responsibleUserName || 'Sistema'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* MODAL: ADD CLIENT */}
       <Modal isOpen={isAddClientModalOpen} onClose={() => setIsAddClientModalOpen(false)} title="Registrar Cliente Consentido">
+
         <form onSubmit={handleAddClientSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nombre Completo</label>

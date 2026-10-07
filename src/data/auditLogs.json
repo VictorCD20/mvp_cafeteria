@@ -1,0 +1,38 @@
+[
+  {
+    "id": "audit-1",
+    "timestamp": "2026-09-30 08:00",
+    "action": "cambio_rol",
+    "description": "Inicio de sesión y apertura de turno con rol Administrador",
+    "responsibleUserId": "usr-admin",
+    "responsibleUserName": "Laura Méndez",
+    "responsibleRole": "administrador",
+    "targetEntity": "usuario",
+    "targetId": "usr-admin",
+    "details": { "branchId": "branch-main" }
+  },
+  {
+    "id": "audit-2",
+    "timestamp": "2026-09-30 08:15",
+    "action": "descuento",
+    "description": "Descuento aplicado del 10% por promoción 'PROMO10' en venta VTA-1049",
+    "responsibleUserId": "usr-admin",
+    "responsibleUserName": "Laura Méndez",
+    "responsibleRole": "administrador",
+    "targetEntity": "venta",
+    "targetId": "VTA-1049",
+    "details": { "discountAmount": 15, "promoCode": "PROMO10" }
+  },
+  {
+    "id": "audit-3",
+    "timestamp": "2026-09-30 09:00",
+    "action": "ajuste_inventario",
+    "description": "Recepción y ajuste positivo de 50 piezas de Vasos Medianos 12oz",
+    "responsibleUserId": "usr-admin",
+    "responsibleUserName": "Laura Méndez",
+    "responsibleRole": "administrador",
+    "targetEntity": "insumo",
+    "targetId": "ing-5",
+    "details": { "deltaQuantity": 50, "unit": "pza", "movementType": "entrada" }
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "att-1",
+    "employeeId": "emp-1",
+    "date": "2026-09-30",
+    "checkIn": "06:55",
+    "checkOut": "16:05",
+    "status": "puntual",
+    "deviceSimulated": "Hikvision DS-K1T804AM"
+  },
+  {
+    "id": "att-2",
+    "employeeId": "emp-2",
+    "date": "2026-09-30",
+    "checkIn": "07:22",
+    "status": "retardo",
+    "notes": "Tráfico pesado en zona centro",
+    "deviceSimulated": "Hikvision DS-K1T804AM"
+  },
+  {
+    "id": "att-3",
+    "employeeId": "emp-3",
+    "date": "2026-09-30",
+    "checkIn": "07:58",
+    "status": "puntual",
+    "deviceSimulated": "Hikvision DS-K1T804AM"
+  },
+  {
+    "id": "att-4",
+    "employeeId": "emp-4",
+    "date": "2026-09-30",
+    "status": "ausente",
+    "notes": "No reportó ingreso al momento",
+    "deviceSimulated": "Hikvision DS-K1T804AM"
+  },
+  {
+    "id": "att-5",
+    "employeeId": "emp-5",
+    "date": "2026-09-30",
+    "checkIn": "07:50",
+    "status": "puntual",
+    "deviceSimulated": "Hikvision DS-K1T804AM"
+  },
+  {
+    "id": "att-6",
+    "employeeId": "emp-6",
+    "date": "2026-09-30",
+    "checkIn": "06:58",
+    "status": "puntual",
+    "deviceSimulated": "Hikvision DS-K1T804AM"
+  }
+]

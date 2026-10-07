@@ -1,0 +1,116 @@
+[
+  {
+    "id": "rec-1",
+    "productId": "prod-1",
+    "productName": "Café Americano (12oz)",
+    "estimatedCost": 8.80,
+    "items": [
+      { "ingredientId": "ing-1", "ingredientName": "Café Molido de Especialidad", "quantity": 18, "unit": "g" },
+      { "ingredientId": "ing-5", "ingredientName": "Vasos Medianos 12oz", "quantity": 1, "unit": "pza" },
+      { "ingredientId": "ing-7", "ingredientName": "Tapas Universales", "quantity": 1, "unit": "pza" }
+    ]
+  },
+  {
+    "id": "rec-2",
+    "productId": "prod-2",
+    "productName": "Espresso Doble",
+    "estimatedCost": 6.30,
+    "items": [
+      { "ingredientId": "ing-1", "ingredientName": "Café Molido de Especialidad", "quantity": 18, "unit": "g" }
+    ]
+  },
+  {
+    "id": "rec-3",
+    "productId": "prod-3",
+    "productName": "Caffè Latte (16oz)",
+    "estimatedCost": 18.10,
+    "items": [
+      { "ingredientId": "ing-1", "ingredientName": "Café Molido de Especialidad", "quantity": 18, "unit": "g" },
+      { "ingredientId": "ing-2", "ingredientName": "Leche Entera Organica", "quantity": 300, "unit": "ml" },
+      { "ingredientId": "ing-6", "ingredientName": "Vasos Grandes 16oz", "quantity": 1, "unit": "pza" },
+      { "ingredientId": "ing-7", "ingredientName": "Tapas Universales", "quantity": 1, "unit": "pza" }
+    ]
+  },
+  {
+    "id": "rec-4",
+    "productId": "prod-4",
+    "productName": "Capuchino Italiano",
+    "estimatedCost": 15.60,
+    "items": [
+      { "ingredientId": "ing-1", "ingredientName": "Café Molido de Especialidad", "quantity": 18, "unit": "g" },
+      { "ingredientId": "ing-2", "ingredientName": "Leche Entera Organica", "quantity": 220, "unit": "ml" },
+      { "ingredientId": "ing-5", "ingredientName": "Vasos Medianos 12oz", "quantity": 1, "unit": "pza" },
+      { "ingredientId": "ing-7", "ingredientName": "Tapas Universales", "quantity": 1, "unit": "pza" }
+    ]
+  },
+  {
+    "id": "rec-5",
+    "productId": "prod-5",
+    "productName": "Caffè Mocha Especial",
+    "estimatedCost": 20.40,
+    "items": [
+      { "ingredientId": "ing-1", "ingredientName": "Café Molido de Especialidad", "quantity": 18, "unit": "g" },
+      { "ingredientId": "ing-2", "ingredientName": "Leche Entera Organica", "quantity": 250, "unit": "ml" },
+      { "ingredientId": "ing-8", "ingredientName": "Jarabe de Chocolate Artesanal", "quantity": 30, "unit": "ml" },
+      { "ingredientId": "ing-6", "ingredientName": "Vasos Grandes 16oz", "quantity": 1, "unit": "pza" },
+      { "ingredientId": "ing-7", "ingredientName": "Tapas Universales", "quantity": 1, "unit": "pza" }
+    ]
+  },
+  {
+    "id": "rec-6",
+    "productId": "prod-6",
+    "productName": "Frappé Moka CODIA",
+    "estimatedCost": 22.80,
+    "items": [
+      { "ingredientId": "ing-1", "ingredientName": "Café Molido de Especialidad", "quantity": 20, "unit": "g" },
+      { "ingredientId": "ing-2", "ingredientName": "Leche Entera Organica", "quantity": 200, "unit": "ml" },
+      { "ingredientId": "ing-8", "ingredientName": "Jarabe de Chocolate Artesanal", "quantity": 40, "unit": "ml" },
+      { "ingredientId": "ing-6", "ingredientName": "Vasos Grandes 16oz", "quantity": 1, "unit": "pza" },
+      { "ingredientId": "ing-7", "ingredientName": "Tapas Universales", "quantity": 1, "unit": "pza" }
+    ]
+  },
+  {
+    "id": "rec-7",
+    "productId": "prod-7",
+    "productName": "Frappé Vainilla Bourbon",
+    "estimatedCost": 21.50,
+    "items": [
+      { "ingredientId": "ing-2", "ingredientName": "Leche Entera Organica", "quantity": 250, "unit": "ml" },
+      { "ingredientId": "ing-9", "ingredientName": "Jarabe Vainilla Bourbon", "quantity": 35, "unit": "ml" },
+      { "ingredientId": "ing-6", "ingredientName": "Vasos Grandes 16oz", "quantity": 1, "unit": "pza" },
+      { "ingredientId": "ing-7", "ingredientName": "Tapas Universales", "quantity": 1, "unit": "pza" }
+    ]
+  },
+  {
+    "id": "rec-8",
+    "productId": "prod-8",
+    "productName": "Té Chai Latte Cremoso",
+    "estimatedCost": 17.20,
+    "items": [
+      { "ingredientId": "ing-10", "ingredientName": "Té Chai Mix Concentrado", "quantity": 30, "unit": "g" },
+      { "ingredientId": "ing-2", "ingredientName": "Leche Entera Organica", "quantity": 250, "unit": "ml" },
+      { "ingredientId": "ing-6", "ingredientName": "Vasos Grandes 16oz", "quantity": 1, "unit": "pza" },
+      { "ingredientId": "ing-7", "ingredientName": "Tapas Universales", "quantity": 1, "unit": "pza" }
+    ]
+  },
+  {
+    "id": "rec-9",
+    "productId": "prod-9",
+    "productName": "Croissant Mantequilla French",
+    "estimatedCost": 12.00,
+    "items": [
+      { "ingredientId": "ing-11", "ingredientName": "Pan de Croissant Mantequilla", "quantity": 1, "unit": "pza" }
+    ]
+  },
+  {
+    "id": "rec-10",
+    "productId": "prod-10",
+    "productName": "Panini Clásico Jamón y Queso",
+    "estimatedCost": 31.00,
+    "items": [
+      { "ingredientId": "ing-12", "ingredientName": "Pan Ciabatta Panini", "quantity": 1, "unit": "pza" },
+      { "ingredientId": "ing-13", "ingredientName": "Queso Gouda Rebanado", "quantity": 50, "unit": "g" },
+      { "ingredientId": "ing-14", "ingredientName": "Jamón Selva Negra", "quantity": 60, "unit": "g" }
+    ]
+  }
+]

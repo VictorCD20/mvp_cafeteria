@@ -1,0 +1,297 @@
+{
+  "schemaVersion": "1.0.0",
+  "application": {
+    "name": "CODIA Cafeterías",
+    "environment": "beta",
+    "timezone": "America/Mexico_City",
+    "currency": "MXN"
+  },
+  "cafeteria": {
+    "id": "demo-cafeteria",
+    "name": "CODIA Cafetería Gourmet",
+    "branches": [
+      {
+        "id": "branch-main",
+        "code": "SUC-01",
+        "name": "Sucursal Principal - Centro",
+        "address": "Av. Reforma 402, Col. Juárez, CDMX",
+        "phone": "55 1234 5678",
+        "isMain": true,
+        "active": true
+      }
+    ]
+  },
+  "modules": {
+    "auth": {
+      "key": "auth",
+      "name": "Autenticación y Sesiones",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": [],
+      "permissions": ["users.manage", "roles.manage"],
+      "settings": {
+        "sessionTimeoutMinutes": 480,
+        "allowPinLogin": true
+      }
+    },
+    "catalog": {
+      "key": "catalog",
+      "name": "Catálogo de Productos",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": [],
+      "permissions": ["inventory.view"],
+      "settings": {
+        "categories": ["cafe_caliente", "cafe_frio", "te_infusiones", "reposteria", "alimentos"]
+      }
+    },
+    "pos": {
+      "key": "pos",
+      "name": "Punto de Venta",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": ["catalog", "inventory", "sales"],
+      "permissions": ["sales.create", "sales.discount"],
+      "settings": {
+        "folioPrefix": "VTA-",
+        "allowStockOverride": false,
+        "requireClient": false
+      }
+    },
+    "cash": {
+      "key": "cash",
+      "name": "Control de Caja",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": ["sales"],
+      "permissions": ["cash.open", "cash.close", "cash.adjust"],
+      "settings": {
+        "initialFloatDefault": 1000
+      }
+    },
+    "inventory": {
+      "key": "inventory",
+      "name": "Inventario y Recetas",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": ["catalog"],
+      "permissions": ["inventory.view", "inventory.receive", "inventory.count", "inventory.adjust", "inventory.waste"],
+      "settings": {
+        "autoDeductOnSale": true,
+        "alertLowStock": true
+      }
+    },
+    "customers": {
+      "key": "customers",
+      "name": "Clientes",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": [],
+      "permissions": ["customers.create", "customers.view"],
+      "settings": {
+        "codePrefix": "CLI-"
+      }
+    },
+    "loyalty": {
+      "key": "loyalty",
+      "name": "Cliente Consentido (Lealtad)",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": ["customers", "sales"],
+      "permissions": ["loyalty.adjust", "loyalty.redeem"],
+      "settings": {
+        "stampsGoal": 8,
+        "welcomeStamps": 1,
+        "allowFridayBonus": true
+      }
+    },
+    "promotions": {
+      "key": "promotions",
+      "name": "Promociones",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": ["sales", "loyalty"],
+      "permissions": ["settings.manage"],
+      "settings": {
+        "allowStacking": false
+      }
+    },
+    "employees": {
+      "key": "employees",
+      "name": "Personal y Pre-Nómina",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": [],
+      "permissions": ["employees.view", "employees.manage", "attendance.review"],
+      "settings": {
+        "lateToleranceMinutes": 15
+      }
+    },
+    "finances": {
+      "key": "finances",
+      "name": "Finanzas y OCR",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": [],
+      "permissions": ["reports.financial"],
+      "settings": {
+        "taxRate": 0.16,
+        "ocrSimulated": true
+      }
+    },
+    "reports": {
+      "key": "reports",
+      "name": "Reportes y Métricas",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": ["sales", "inventory", "finances"],
+      "permissions": ["reports.operational", "reports.financial"],
+      "settings": {
+        "excludeShiftSummariesFromDaily": true
+      }
+    },
+    "assistant": {
+      "key": "assistant",
+      "name": "Asistente Virtual CODIA",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": [],
+      "permissions": [],
+      "settings": {
+        "simulatedAi": true
+      }
+    },
+    "settings": {
+      "key": "settings",
+      "name": "Configuración del Sistema",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": [],
+      "permissions": ["settings.manage", "users.manage", "roles.manage"],
+      "settings": {}
+    },
+    "audit": {
+      "key": "audit",
+      "name": "Auditoría",
+      "version": "1.0.0",
+      "enabled": true,
+      "dependencies": [],
+      "permissions": ["audit.view"],
+      "settings": {
+        "logSensitiveActions": true
+      }
+    }
+  },
+  "roles": {
+    "superadmin": {
+      "id": "superadmin",
+      "name": "Superadministrador CODIA",
+      "description": "Configuración de instancia, activación de módulos, folios, soporte y auditoría técnica.",
+      "permissions": ["*"]
+    },
+    "administrador": {
+      "id": "administrador",
+      "name": "Administrador",
+      "description": "Control total de la cafetería: usuarios, precios, costos, inventario, finanzas, promociones y reportes.",
+      "permissions": [
+        "sales.create", "sales.view_own", "sales.view_branch", "sales.cancel", "sales.discount",
+        "cash.open", "cash.close", "cash.adjust",
+        "inventory.view", "inventory.receive", "inventory.count", "inventory.adjust", "inventory.waste",
+        "customers.create", "customers.view", "loyalty.adjust", "loyalty.redeem",
+        "employees.view", "employees.manage", "attendance.review",
+        "reports.operational", "reports.financial",
+        "settings.manage", "users.manage", "roles.manage", "audit.view"
+      ]
+    },
+    "encargado": {
+      "id": "encargado",
+      "name": "Encargado de Sucursal",
+      "description": "Supervisión operativa de caja, ventas de sucursal, descuentos, cancelaciones, compras, mermas, conteos y asistencia.",
+      "permissions": [
+        "sales.create", "sales.view_own", "sales.view_branch", "sales.cancel", "sales.discount",
+        "cash.open", "cash.close", "cash.adjust",
+        "inventory.view", "inventory.receive", "inventory.count", "inventory.waste",
+        "customers.create", "customers.view", "loyalty.adjust", "loyalty.redeem",
+        "employees.view", "attendance.review",
+        "reports.operational"
+      ]
+    },
+    "empleado": {
+      "id": "empleado",
+      "name": "Empleado Operativo",
+      "description": "Operación de POS, pedidos, consulta de catálogo, identificación de clientes y registro de asistencia.",
+      "permissions": [
+        "sales.create", "sales.view_own",
+        "inventory.view",
+        "customers.create", "customers.view",
+        "loyalty.redeem"
+      ]
+    },
+    "cliente": {
+      "id": "cliente",
+      "name": "Cliente",
+      "description": "Vista pública independiente: registro, consulta de sellos, recompensas, promociones y visualización de QR.",
+      "permissions": [
+        "customers.view_own",
+        "loyalty.view_own"
+      ]
+    }
+  },
+  "permissions": {
+    "sales.create": "Registrar ventas en el POS",
+    "sales.view_own": "Ver ventas registradas por el usuario actual",
+    "sales.view_branch": "Ver todas las ventas de la sucursal",
+    "sales.cancel": "Autorizar cancelación de tickets de venta",
+    "sales.discount": "Autorizar descuentos manuales en ventas",
+    "cash.open": "Apertura de turno de caja",
+    "cash.close": "Cierre y corte de caja",
+    "cash.adjust": "Ajuste de arqueo de caja",
+    "inventory.view": "Consultar catálogo de insumos y recetas",
+    "inventory.receive": "Registrar entradas y compras de insumos",
+    "inventory.count": "Realizar conteo físico de inventario",
+    "inventory.adjust": "Ajustar existencias de insumos",
+    "inventory.waste": "Registrar mermas de insumos",
+    "customers.create": "Registrar nuevos clientes",
+    "customers.view": "Consultar lista y detalle de clientes",
+    "loyalty.adjust": "Ajustar sellos manualmente a un cliente",
+    "loyalty.redeem": "Canjear recompensas de fidelidad",
+    "employees.view": "Consultar directorio de empleados",
+    "employees.manage": "Crear y editar información de empleados",
+    "attendance.review": "Revisar y justificar asistencia y retardos",
+    "reports.operational": "Ver reportes operativos de ventas e inventario",
+    "reports.financial": "Ver reportes financieros, costos y utilidades",
+    "settings.manage": "Modificar configuración de la cafetería",
+    "users.manage": "Gestionar cuentas y accesos de usuarios",
+    "roles.manage": "Asignar y modificar roles y permisos",
+    "audit.view": "Consultar registro de auditoría de operaciones"
+  },
+  "loyalty": {
+    "stampsPerReward": 8,
+    "welcomeStamps": 1,
+    "allowFridayDouble": true,
+    "tiers": [
+      { "name": "Nuevo", "minVisits": 0 },
+      { "name": "Frecuente", "minVisits": 6 },
+      { "name": "VIP Consentido", "minVisits": 16 }
+    ]
+  },
+  "attendance": {
+    "defaultToleranceMinutes": 15,
+    "standardCheckIn": "07:00",
+    "deviceTypeSimulated": "Hikvision DS-K1T804AM"
+  },
+  "sales": {
+    "folioPrefix": "VTA-",
+    "initialFolioNumber": 1049,
+    "allowNegativeStock": false,
+    "defaultTaxRate": 0.16
+  },
+  "featureFlags": {
+    "enableHikvisionSimulation": true,
+    "enablePacInvoicingSimulation": true,
+    "enableGoogleWalletSimulation": true,
+    "enableAiAssistantSimulation": true,
+    "enableDemoFridayToggle": true,
+    "enforceStrictInventoryValidation": true
+  }
+}

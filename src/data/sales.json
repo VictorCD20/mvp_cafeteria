@@ -1,0 +1,86 @@
+[
+  {
+    "id": "sale-1",
+    "folio": "VTA-1049",
+    "timestamp": "2026-09-30 08:15",
+    "items": [
+      { "productId": "prod-3", "productName": "Caffè Latte (16oz)", "price": 58, "quantity": 2 },
+      { "productId": "prod-9", "productName": "Croissant Mantequilla French", "price": 42, "quantity": 2 }
+    ],
+    "subtotal": 200,
+    "discount": 0,
+    "total": 200,
+    "paymentMethod": "tarjeta",
+    "clientId": "cli-1",
+    "clientName": "Mariana Ríos",
+    "stampsEarned": 1
+  },
+  {
+    "id": "sale-2",
+    "folio": "VTA-1050",
+    "timestamp": "2026-09-30 09:30",
+    "items": [
+      { "productId": "prod-6", "productName": "Frappé Moka CODIA", "price": 68, "quantity": 1 },
+      { "productId": "prod-10", "productName": "Panini Clásico Jamón y Queso", "price": 85, "quantity": 1 }
+    ],
+    "subtotal": 153,
+    "discount": 0,
+    "total": 153,
+    "paymentMethod": "efectivo",
+    "clientId": "cli-4",
+    "clientName": "Fernando Morales",
+    "stampsEarned": 1
+  },
+  {
+    "id": "sale-3",
+    "folio": "VTA-1051",
+    "timestamp": "2026-09-30 10:45",
+    "items": [
+      { "productId": "prod-1", "productName": "Café Americano (12oz)", "price": 45, "quantity": 3 },
+      { "productId": "prod-8", "productName": "Té Chai Latte Cremoso", "price": 55, "quantity": 1 }
+    ],
+    "subtotal": 190,
+    "discount": 0,
+    "total": 190,
+    "paymentMethod": "tarjeta",
+    "clientId": "cli-7",
+    "clientName": "Beatriz Villanueva",
+    "stampsEarned": 1
+  },
+  {
+    "id": "corte-1",
+    "folio": "CORTE-2026-09-27",
+    "timestamp": "2026-09-27 21:00",
+    "items": [{ "productId": "corte", "productName": "Corte de caja del día (96 tickets)", "price": 4860, "quantity": 1 }],
+    "subtotal": 4860,
+    "discount": 0,
+    "total": 4860,
+    "paymentMethod": "tarjeta",
+    "stampsEarned": 0,
+    "isShiftSummary": true
+  },
+  {
+    "id": "corte-2",
+    "folio": "CORTE-2026-09-28",
+    "timestamp": "2026-09-28 21:00",
+    "items": [{ "productId": "corte", "productName": "Corte de caja del día (103 tickets)", "price": 5240, "quantity": 1 }],
+    "subtotal": 5240,
+    "discount": 0,
+    "total": 5240,
+    "paymentMethod": "tarjeta",
+    "stampsEarned": 0,
+    "isShiftSummary": true
+  },
+  {
+    "id": "corte-3",
+    "folio": "CORTE-2026-09-29",
+    "timestamp": "2026-09-29 21:00",
+    "items": [{ "productId": "corte", "productName": "Corte de caja del día (99 tickets)", "price": 5015, "quantity": 1 }],
+    "subtotal": 5015,
+    "discount": 0,
+    "total": 5015,
+    "paymentMethod": "tarjeta",
+    "stampsEarned": 0,
+    "isShiftSummary": true
+  }
+]

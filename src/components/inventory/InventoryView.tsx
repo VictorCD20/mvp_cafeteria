@@ -389,10 +389,18 @@ export const InventoryView = () => {
       {/* TAB 4: MOVIMIENTOS HISTORIAL */}
       {activeSubTab === 'movimientos' && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-              Historial de Entradas, Salidas y Deducciones por Venta
-            </h3>
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm">
+                Historial de Movimientos de Inventario
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Registro formal de consumos por venta, entradas, mermas, compras y ajustes con usuario responsable.
+              </p>
+            </div>
+            <span className="text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+              {movements.length} registro(s)
+            </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -400,40 +408,101 @@ export const InventoryView = () => {
                 <tr>
                   <th className="p-3">Fecha / Hora</th>
                   <th className="p-3">Insumo</th>
-                  <th className="p-3">Tipo</th>
+                  <th className="p-3">Tipo de Movimiento</th>
                   <th className="p-3">Cantidad</th>
-                  <th className="p-3">Motivo / Origen</th>
+                  <th className="p-3">Motivo / Folio</th>
+                  <th className="p-3">Responsable</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {movements.map((mov) => (
-                  <tr key={mov.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                    <td className="p-3 text-slate-500 font-mono">{mov.timestamp}</td>
-                    <td className="p-3 font-bold text-slate-900 dark:text-white">{mov.ingredientName}</td>
-                    <td className="p-3">
-                      {mov.type === 'salida' ? (
-                        <span className="bg-rose-500/10 text-rose-600 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center space-x-1">
-                          <ArrowDownRight className="w-3 h-3" />
-                          <span>Salida</span>
-                        </span>
-                      ) : (
-                        <span className="bg-emerald-500/10 text-emerald-600 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center space-x-1">
-                          <ArrowUpRight className="w-3 h-3" />
-                          <span>Entrada</span>
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-3 font-bold text-slate-800 dark:text-slate-200">
-                      {mov.quantity} {mov.unit}
-                    </td>
-                    <td className="p-3 text-slate-600 dark:text-slate-400 font-medium">{mov.reason}</td>
-                  </tr>
-                ))}
+                {movements.map((mov) => {
+                  const getBadge = () => {
+                    switch (mov.type) {
+                      case 'consumo_venta':
+                        return (
+                          <span className="bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center space-x-1">
+                            <ArrowDownRight className="w-3 h-3" />
+                            <span>Consumo POS</span>
+                          </span>
+                        );
+                      case 'merma':
+                        return (
+                          <span className="bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center space-x-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            <span>Merma</span>
+                          </span>
+                        );
+                      case 'entrada':
+                      case 'compra':
+                        return (
+                          <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center space-x-1">
+                            <ArrowUpRight className="w-3 h-3" />
+                            <span>{mov.type === 'compra' ? 'Compra' : 'Entrada'}</span>
+                          </span>
+                        );
+                      case 'ajuste_positivo':
+                        return (
+                          <span className="bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center space-x-1">
+                            <ArrowUpRight className="w-3 h-3" />
+                            <span>Ajuste (+)</span>
+                          </span>
+                        );
+                      case 'ajuste_negativo':
+                        return (
+                          <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center space-x-1">
+                            <ArrowDownRight className="w-3 h-3" />
+                            <span>Ajuste (-)</span>
+                          </span>
+                        );
+                      case 'cancelacion':
+                      case 'devolucion':
+                        return (
+                          <span className="bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold px-2 py-0.5 rounded text-[10px] inline-flex items-center space-x-1">
+                            <span>{mov.type === 'cancelacion' ? 'Cancelación' : 'Devolución'}</span>
+                          </span>
+                        );
+                      default:
+                        return (
+                          <span className="bg-slate-500/10 text-slate-600 font-bold px-2 py-0.5 rounded text-[10px]">
+                            {mov.type}
+                          </span>
+                        );
+                    }
+                  };
+
+                  return (
+                    <tr key={mov.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <td className="p-3 text-slate-500 font-mono text-[11px]">{mov.timestamp}</td>
+                      <td className="p-3 font-bold text-slate-900 dark:text-white">{mov.ingredientName}</td>
+                      <td className="p-3">{getBadge()}</td>
+                      <td className="p-3 font-bold text-slate-800 dark:text-slate-200">
+                        {mov.quantity} {mov.unit}
+                        {mov.costImpact ? (
+                          <span className="block text-[10px] text-slate-400 font-normal">
+                            (${mov.costImpact} MXN)
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="p-3 text-slate-600 dark:text-slate-400 font-medium">
+                        {mov.reason}
+                        {mov.saleFolio ? (
+                          <span className="ml-1 text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold">
+                            [{mov.saleFolio}]
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="p-3 text-slate-500 font-medium text-[11px]">
+                        {mov.responsibleUserName || 'Sistema'}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       )}
+
 
       {/* MODAL: UPDATE STOCK */}
       <Modal isOpen={isStockModalOpen} onClose={() => setIsStockModalOpen(false)} title="Modificar Stock de Insumo">

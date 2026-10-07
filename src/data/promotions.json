@@ -1,0 +1,32 @@
+[
+  {
+    "id": "prom-1",
+    "title": "Doble Sello de Fidelidad los Viernes",
+    "description": "Acumula 2 sellos en tu tarjeta digital en todas tus compras superiores a $100 MXN durante todo el viernes.",
+    "audience": "todos",
+    "validUntil": "2026-12-31",
+    "active": true,
+    "code": "VIERNES2X",
+    "bonusStamps": 1
+  },
+  {
+    "id": "prom-2",
+    "title": "15% OFF en Bebidas Frías y Frappés",
+    "description": "Descuento especial exclusivo para nuestros clientes frecuentes y VIP en cualquier frappé o iced coffee.",
+    "audience": "frecuentes",
+    "validUntil": "2026-10-31",
+    "active": true,
+    "code": "FRIO15",
+    "discountPercentage": 15
+  },
+  {
+    "id": "prom-3",
+    "title": "Croissant Gratis al desbloquear Recompensa",
+    "description": "Recibe un Croissant de mantequilla recién horneado de regalo al canjear tu recompensa de 8 sellos.",
+    "audience": "proximos_recompensa",
+    "validUntil": "2026-11-15",
+    "active": true,
+    "code": "RECOMPENSA_PLUS",
+    "freeItem": "Croissant Mantequilla"
+  }
+]

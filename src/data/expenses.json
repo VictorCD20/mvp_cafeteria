@@ -1,0 +1,38 @@
+[
+  {
+    "id": "exp-1",
+    "folio": "EGR-801",
+    "date": "2026-09-30",
+    "supplier": "Distribuidora de Café Gourmet S.A. de C.V.",
+    "category": "insumos",
+    "description": "Compra de 10kg Café en Grano Tostado Especial",
+    "subtotal": 2800,
+    "tax": 448,
+    "total": 3248,
+    "ocrScanned": true
+  },
+  {
+    "id": "exp-2",
+    "folio": "EGR-802",
+    "date": "2026-09-29",
+    "supplier": "Lácteos Altiplano",
+    "category": "insumos",
+    "description": "Suministro semanal de leche orgánica y entera",
+    "subtotal": 1500,
+    "tax": 0,
+    "total": 1500,
+    "ocrScanned": true
+  },
+  {
+    "id": "exp-3",
+    "folio": "EGR-803",
+    "date": "2026-09-28",
+    "supplier": "CFE Suministrador Básico",
+    "category": "servicios",
+    "description": "Pago bimestral de energía eléctrica sucursal",
+    "subtotal": 4200,
+    "tax": 672,
+    "total": 4872,
+    "ocrScanned": false
+  }
+]

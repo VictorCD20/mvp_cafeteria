@@ -1,0 +1,23 @@
+[
+  {
+    "id": "sup-1",
+    "name": "Distribuidora de Café Gourmet S.A. de C.V.",
+    "category": "granos",
+    "contact": "ventas@cafegourmet.mx",
+    "phone": "55 3322 1100"
+  },
+  {
+    "id": "sup-2",
+    "name": "Lácteos Altiplano",
+    "category": "lacteos",
+    "contact": "pedidos@lacteosaltiplano.com",
+    "phone": "55 4433 2211"
+  },
+  {
+    "id": "sup-3",
+    "name": "CFE Suministrador Básico",
+    "category": "servicios",
+    "contact": "071",
+    "phone": "071"
+  }
+]

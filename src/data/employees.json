@@ -1,0 +1,80 @@
+[
+  {
+    "id": "emp-1",
+    "code": "EMP-001",
+    "name": "Laura Méndez",
+    "role": "administrador",
+    "dailyRate": 650,
+    "schedule": "07:00 - 16:00",
+    "workDays": "Lunes a Viernes",
+    "status": "activo",
+    "email": "laura.mendez@codia.com",
+    "phone": "55 9876 5432",
+    "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": "emp-2",
+    "code": "EMP-002",
+    "name": "Ana Torres",
+    "role": "barista",
+    "dailyRate": 430,
+    "schedule": "07:00 - 15:00",
+    "workDays": "Lunes a Sábado",
+    "status": "activo",
+    "email": "ana.torres@codia.com",
+    "phone": "55 8765 4321",
+    "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": "emp-3",
+    "code": "EMP-003",
+    "name": "Luis García",
+    "role": "cajero",
+    "dailyRate": 400,
+    "schedule": "08:00 - 16:00",
+    "workDays": "Lunes a Domingo",
+    "status": "activo",
+    "email": "luis.garcia@codia.com",
+    "phone": "55 7654 3210",
+    "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": "emp-4",
+    "code": "EMP-004",
+    "name": "Sofía Martínez",
+    "role": "barista",
+    "dailyRate": 430,
+    "schedule": "14:00 - 22:00",
+    "workDays": "Martes a Domingo",
+    "status": "activo",
+    "email": "sofia.martinez@codia.com",
+    "phone": "55 6543 2109",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": "emp-5",
+    "code": "EMP-005",
+    "name": "Carlos Ramírez",
+    "role": "encargado",
+    "dailyRate": 580,
+    "schedule": "08:00 - 17:00",
+    "workDays": "Lunes a Sábado",
+    "status": "activo",
+    "email": "carlos.ramirez@codia.com",
+    "phone": "55 5432 1098",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": "emp-6",
+    "code": "EMP-006",
+    "name": "María López",
+    "role": "cocina",
+    "dailyRate": 440,
+    "schedule": "07:00 - 15:00",
+    "workDays": "Lunes a Sábado",
+    "status": "activo",
+    "email": "maria.lopez@codia.com",
+    "phone": "55 4321 0987",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80"
+  }
+]

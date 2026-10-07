@@ -1,0 +1,102 @@
+[
+  {
+    "id": "prod-1",
+    "code": "CAF-001",
+    "name": "Café Americano (12oz)",
+    "category": "cafe_caliente",
+    "price": 45,
+    "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-1"
+  },
+  {
+    "id": "prod-2",
+    "code": "CAF-002",
+    "name": "Espresso Doble",
+    "category": "cafe_caliente",
+    "price": 38,
+    "image": "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-2"
+  },
+  {
+    "id": "prod-3",
+    "code": "CAF-003",
+    "name": "Caffè Latte (16oz)",
+    "category": "cafe_caliente",
+    "price": 58,
+    "image": "https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-3"
+  },
+  {
+    "id": "prod-4",
+    "code": "CAF-004",
+    "name": "Capuchino Italiano",
+    "category": "cafe_caliente",
+    "price": 58,
+    "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-4"
+  },
+  {
+    "id": "prod-5",
+    "code": "CAF-005",
+    "name": "Caffè Mocha Especial",
+    "category": "cafe_caliente",
+    "price": 62,
+    "image": "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-5"
+  },
+  {
+    "id": "prod-6",
+    "code": "FRI-001",
+    "name": "Frappé Moka CODIA",
+    "category": "cafe_frio",
+    "price": 68,
+    "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-6"
+  },
+  {
+    "id": "prod-7",
+    "code": "FRI-002",
+    "name": "Frappé Vainilla Bourbon",
+    "category": "cafe_frio",
+    "price": 68,
+    "image": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-7"
+  },
+  {
+    "id": "prod-8",
+    "code": "TE-001",
+    "name": "Té Chai Latte Cremoso",
+    "category": "te_infusiones",
+    "price": 55,
+    "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-8"
+  },
+  {
+    "id": "prod-9",
+    "code": "PAN-001",
+    "name": "Croissant Mantequilla French",
+    "category": "reposteria",
+    "price": 42,
+    "image": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-9"
+  },
+  {
+    "id": "prod-10",
+    "code": "ALI-001",
+    "name": "Panini Clásico Jamón y Queso",
+    "category": "alimentos",
+    "price": 85,
+    "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&auto=format&fit=crop&q=80",
+    "available": true,
+    "recipeId": "rec-10"
+  }
+]

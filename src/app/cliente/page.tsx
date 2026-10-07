@@ -3,8 +3,7 @@
 import React from 'react';
 import { CodiaProvider } from '../../context/CodiaContext';
 import { CustomerView } from '../../components/customer/CustomerView';
-import { Coffee, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { Coffee, ShieldCheck } from 'lucide-react';
 
 function PublicCustomerApp() {
   return (
@@ -19,13 +18,10 @@ function PublicCustomerApp() {
             <div className="text-[11px] text-purple-400 font-medium">Tarjeta digital demo (Pública)</div>
           </div>
         </div>
-        <Link
-          href="/"
-          className="text-xs text-slate-400 hover:text-white flex items-center gap-1 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Panel Admin</span>
-        </Link>
+        <div className="text-xs text-slate-400 flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">
+          <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+          <span>Vista de Cliente</span>
+        </div>
       </header>
 
       <main className="my-auto py-6 flex justify-center">
@@ -33,7 +29,7 @@ function PublicCustomerApp() {
       </main>
 
       <footer className="max-w-md mx-auto w-full text-center text-[11px] text-slate-500 pt-4 border-t border-slate-800 shrink-0">
-        Demostración interactiva de Tarjeta Digital · Sin backend real · Datos ficticios
+        Portal de Cliente Consentido · Sin acceso a operaciones administrativas
       </footer>
     </div>
   );

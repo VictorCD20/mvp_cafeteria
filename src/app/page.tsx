@@ -16,36 +16,56 @@ import { ReportsView } from '../components/reports/ReportsView';
 import { SettingsView } from '../components/settings/SettingsView';
 
 function AppContent() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Default logged in for fast demo access, with login view toggle available
-  const { activeTab } = useCodia();
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const { activeTab, currentUser, hasPermission, switchRole } = useCodia();
 
   if (!isAuthenticated) {
     return <LoginView onLoginSuccess={() => setIsAuthenticated(true)} />;
   }
 
   const renderActiveView = () => {
+    // Si el rol activo es cliente, aislar la vista y no renderizar controles de administración
+    if (currentUser.role === 'cliente') {
+      return (
+        <div className="p-6 max-w-2xl mx-auto space-y-4">
+          <div className="bg-purple-500/10 border border-purple-500/30 text-purple-700 dark:text-purple-300 p-4 rounded-2xl text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+            <div>
+              <span className="font-bold">Sesión en Modo Cliente:</span> Acceso administrativo bloqueado.
+            </div>
+            <button
+              onClick={() => switchRole('administrador')}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-3 py-1.5 rounded-lg text-xs transition-colors shadow"
+            >
+              Cambiar a Administradora
+            </button>
+          </div>
+          <CustomerView isStandalonePublic />
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case 'inicio':
         return <DashboardView />;
       case 'ventas':
-        return <PosView />;
+        return hasPermission('sales.create') || hasPermission('sales.view_own') ? <PosView /> : <DashboardView />;
       case 'inventario':
-        return <InventoryView />;
+        return hasPermission('inventory.view') ? <InventoryView /> : <DashboardView />;
       case 'empleados':
-        return <EmployeesView />;
+        return hasPermission('employees.view') || hasPermission('attendance.review') ? <EmployeesView /> : <DashboardView />;
       case 'finances':
       case 'finanzas':
-        return <FinancesView />;
+        return hasPermission('reports.financial') ? <FinancesView /> : <DashboardView />;
       case 'cliente_consentido':
-        return <LoyaltyView />;
+        return hasPermission('customers.view') || hasPermission('loyalty.redeem') ? <LoyaltyView /> : <DashboardView />;
       case 'vista_cliente':
         return <CustomerView />;
       case 'asistente':
-        return <BotView />;
+        return hasPermission('reports.operational') || hasPermission('sales.view_branch') || hasPermission('settings.manage') ? <BotView /> : <DashboardView />;
       case 'reportes':
-        return <ReportsView />;
+        return hasPermission('reports.operational') || hasPermission('reports.financial') ? <ReportsView /> : <DashboardView />;
       case 'configuracion':
-        return <SettingsView />;
+        return hasPermission('settings.manage') ? <SettingsView /> : <DashboardView />;
       default:
         return <DashboardView />;
     }

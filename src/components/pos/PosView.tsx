@@ -13,12 +13,12 @@ import {
   CreditCard,
   Banknote,
   User,
-  CheckCircle,
   Receipt,
   Search,
-  Sparkles,
   ArrowRight,
-  Printer
+  Loader2,
+  Ban,
+  AlertCircle
 } from 'lucide-react';
 
 export const PosView = () => {
@@ -31,11 +31,16 @@ export const PosView = () => {
   const [paymentMethod, setPaymentMethod] = useState<'efectivo' | 'tarjeta'>('tarjeta');
   const [simulateFriday, setSimulateFriday] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Receipt modal after sale
   const [lastSaleFolio, setLastSaleFolio] = useState<string | null>(null);
 
   const addToCart = (product: Product) => {
+    if (product.available === false) {
+      setCheckoutError(`El producto "${product.name}" no está disponible actualmente.`);
+      return;
+    }
     setCheckoutError(null);
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
@@ -49,16 +54,18 @@ export const PosView = () => {
   };
 
   const removeFromCart = (productId: string) => {
+    setCheckoutError(null);
     setCart((prev) => prev.filter((item) => item.product.id !== productId));
   };
 
   const updateQuantity = (productId: string, delta: number) => {
+    setCheckoutError(null);
     setCart((prev) =>
       prev
         .map((item) => {
           if (item.product.id === productId) {
             const newQty = item.quantity + delta;
-            return newQty > 0 ? { ...item, quantity: newQty } : null;
+            return newQty > 0 ? { ...item, quantity: Math.floor(newQty) } : null;
           }
           return item;
         })
@@ -70,15 +77,25 @@ export const PosView = () => {
   const quote = quoteSale(cart, promotions, selectedClient, { forceFriday: simulateFriday });
   const isFridayToday = isFridayInMexico();
 
-  const handleCheckout = () => {
-    const result = registerSale(cart, paymentMethod, selectedClientId || undefined, { forceFriday: simulateFriday });
-    if (result.success) {
-      setCheckoutError(null);
-      setLastSaleFolio(result.folio);
-      setCart([]);
-      setSelectedClientId('');
-    } else {
-      setCheckoutError(result.message);
+  const handleCheckout = async () => {
+    if (isProcessing || cart.length === 0) return;
+    setIsProcessing(true);
+    setCheckoutError(null);
+
+    try {
+      // Breve pausa para debounce y prevenir doble clic accidental
+      await new Promise((res) => setTimeout(res, 200));
+      const result = registerSale(cart, paymentMethod, selectedClientId || undefined, { forceFriday: simulateFriday });
+      if (result.success) {
+        setCheckoutError(null);
+        setLastSaleFolio(result.folio);
+        setCart([]);
+        setSelectedClientId('');
+      } else {
+        setCheckoutError(result.message);
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -140,37 +157,60 @@ export const PosView = () => {
 
         {/* Product Cards Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {filteredProducts.map((prod) => (
-            <button
-              key={prod.id}
-              onClick={() => addToCart(prod)}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 flex flex-col justify-between hover:border-blue-500/80 hover:shadow-lg transition-all group text-left relative overflow-hidden"
-            >
-              <div className="w-full h-24 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden mb-2 relative">
-                <img
-                  src={prod.image}
-                  alt={prod.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <span className="absolute top-1 right-1 bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-black px-2 py-0.5 rounded-md">
-                  ${prod.price}
-                </span>
-              </div>
-
-              <div>
-                <div className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-blue-600 transition">
-                  {prod.name}
+          {filteredProducts.map((prod) => {
+            const isAvailable = prod.available !== false;
+            return (
+              <button
+                key={prod.id}
+                onClick={() => addToCart(prod)}
+                disabled={!isAvailable}
+                className={`bg-white dark:bg-slate-900 rounded-2xl border p-3 flex flex-col justify-between transition-all group text-left relative overflow-hidden ${
+                  isAvailable
+                    ? 'border-slate-200 dark:border-slate-800 hover:border-blue-500/80 hover:shadow-lg'
+                    : 'border-slate-200/60 dark:border-slate-800/60 opacity-60 cursor-not-allowed bg-slate-50/50'
+                }`}
+              >
+                <div className="w-full h-24 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden mb-2 relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={prod.image}
+                    alt={prod.name}
+                    className={`w-full h-full object-cover transition-transform duration-300 ${
+                      isAvailable ? 'group-hover:scale-105' : 'grayscale'
+                    }`}
+                  />
+                  <span className="absolute top-1 right-1 bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-black px-2 py-0.5 rounded-md">
+                    ${prod.price}
+                  </span>
+                  {!isAvailable && (
+                    <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center text-white text-[10px] font-bold gap-1 uppercase tracking-wider">
+                      <Ban className="w-3.5 h-3.5" />
+                      <span>Agotado</span>
+                    </div>
+                  )}
                 </div>
-                <div className="text-[10px] text-slate-400 capitalize mt-0.5">
-                  {prod.category.replace('_', ' ')}
-                </div>
-              </div>
 
-              <div className="mt-2 text-center bg-blue-50 dark:bg-blue-950/50 group-hover:bg-blue-600 text-blue-600 dark:text-blue-400 group-hover:text-white font-bold text-[11px] py-1.5 rounded-lg transition">
-                + Agregar
-              </div>
-            </button>
-          ))}
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-blue-600 transition">
+                    {prod.name}
+                  </div>
+                  <div className="text-[10px] text-slate-400 capitalize mt-0.5">
+                    {prod.category.replace('_', ' ')}
+                  </div>
+                </div>
+
+                <div
+                  className={`mt-2 text-center font-bold text-[11px] py-1.5 rounded-lg transition ${
+                    isAvailable
+                      ? 'bg-blue-50 dark:bg-blue-950/50 group-hover:bg-blue-600 text-blue-600 dark:text-blue-400 group-hover:text-white'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                >
+                  {isAvailable ? '+ Agregar' : 'No disponible'}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -186,7 +226,10 @@ export const PosView = () => {
               </h2>
               {cart.length > 0 && (
                 <button
-                  onClick={() => setCart([])}
+                  onClick={() => {
+                    setCart([]);
+                    setCheckoutError(null);
+                  }}
                   className="text-xs text-rose-500 font-semibold hover:underline"
                 >
                   Vaciar
@@ -215,6 +258,7 @@ export const PosView = () => {
                       <button
                         onClick={() => updateQuantity(item.product.id, -1)}
                         className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-300"
+                        title="Disminuir cantidad"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
@@ -224,12 +268,14 @@ export const PosView = () => {
                       <button
                         onClick={() => updateQuantity(item.product.id, 1)}
                         className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-300"
+                        title="Aumentar cantidad"
                       >
                         <Plus className="w-3 h-3" />
                       </button>
                       <button
                         onClick={() => removeFromCart(item.product.id)}
                         className="text-slate-400 hover:text-rose-500 ml-1"
+                        title="Eliminar producto"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -240,7 +286,7 @@ export const PosView = () => {
             ) : (
               <div className="text-center py-6 text-slate-400 text-xs">
                 <ShoppingCart className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
-                El carrito está vacío. Haz clic en una bebida del menú para iniciar la orden.
+                El carrito está vacío. Haz clic en un producto del menú para iniciar la orden.
               </div>
             )}
           </div>
@@ -255,7 +301,10 @@ export const PosView = () => {
               </label>
               <select
                 value={selectedClientId}
-                onChange={(e) => setSelectedClientId(e.target.value)}
+                onChange={(e) => {
+                  setSelectedClientId(e.target.value);
+                  setCheckoutError(null);
+                }}
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white"
               >
                 <option value="">-- Cliente Mostrador (General) --</option>
@@ -345,18 +394,28 @@ export const PosView = () => {
             </div>
 
             {checkoutError && (
-              <div role="alert" className="text-[11px] text-red-600 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl p-2.5">
-                {checkoutError}
+              <div role="alert" className="text-[11px] text-rose-700 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl p-2.5 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                <span>{checkoutError}</span>
               </div>
             )}
 
             <button
               onClick={handleCheckout}
-              disabled={cart.length === 0}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/30 transition text-xs flex items-center justify-center space-x-2"
+              disabled={isProcessing || cart.length === 0}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/30 transition text-xs flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed"
             >
-              <span>Confirmar Venta & Descontar Inventario</span>
-              <ArrowRight className="w-4 h-4" />
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Procesando Venta...</span>
+                </>
+              ) : (
+                <>
+                  <span>Confirmar Venta & Descontar Inventario</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </div>
         </div>

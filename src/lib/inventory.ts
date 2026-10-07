@@ -1,5 +1,6 @@
-import { Ingredient, Recipe } from '../types';
-import { CartLine } from './promotions';
+import type { Ingredient, Recipe } from '../types';
+import type { CartLine } from './promotions';
+
 
 export interface Shortage {
   ingredientName: string;

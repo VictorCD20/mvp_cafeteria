@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useCodia } from '../../context/CodiaContext';
 import {
   LayoutDashboard,
@@ -14,8 +14,11 @@ import {
   Settings,
   Coffee,
   Smartphone,
+  ChevronDown,
+  ShieldCheck,
   LucideIcon
 } from 'lucide-react';
+import { UserRole, Permission } from '../../types';
 
 interface NavItem {
   id: string;
@@ -24,6 +27,7 @@ interface NavItem {
   badge?: string;
   badgeTone?: 'amber' | 'emerald' | 'blue';
   badgeTitle?: string;
+  requiredPermission?: Permission;
 }
 
 const badgeTones = {
@@ -38,34 +42,46 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
-  const { activeTab, setActiveTab, setSubTab, ingredients, clients } = useCodia();
+  const {
+    activeTab,
+    setActiveTab,
+    setSubTab,
+    ingredients,
+    clients,
+    currentUser,
+    switchRole,
+    hasPermission,
+    demoUsers
+  } = useCodia();
+
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const lowStockCount = ingredients.filter((i) => i.currentStock <= i.minStock).length;
   const rewardsAvailableCount = clients.filter((c) => c.rewardsAvailable > 0).length;
 
-  // Los módulos se agrupan por área para que el menú se lea de un vistazo.
-  const groups: { label: string; items: NavItem[] }[] = [
+  const rawGroups: { label: string; items: NavItem[] }[] = [
     {
       label: 'Operación diaria',
       items: [
-        { id: 'inicio', label: 'Inicio', icon: LayoutDashboard },
-        { id: 'ventas', label: 'Ventas (POS)', icon: ShoppingCart },
+        { id: 'inicio', label: 'Inicio', icon: LayoutDashboard, requiredPermission: 'sales.view_own' },
+        { id: 'ventas', label: 'Ventas (POS)', icon: ShoppingCart, requiredPermission: 'sales.create' },
         {
           id: 'inventario',
           label: 'Inventario y recetas',
           icon: Package,
           badge: lowStockCount > 0 ? String(lowStockCount) : undefined,
           badgeTone: 'amber',
-          badgeTitle: `${lowStockCount} insumos con stock bajo`
+          badgeTitle: `${lowStockCount} insumos con stock bajo`,
+          requiredPermission: 'inventory.view'
         }
       ]
     },
     {
       label: 'Equipo y finanzas',
       items: [
-        { id: 'empleados', label: 'Empleados y pre-nómina', icon: Users },
-        { id: 'finanzas', label: 'Finanzas y OCR', icon: CircleDollarSign },
-        { id: 'reportes', label: 'Reportes', icon: BarChart3 }
+        { id: 'empleados', label: 'Empleados y pre-nómina', icon: Users, requiredPermission: 'employees.view' },
+        { id: 'finanzas', label: 'Finanzas y OCR', icon: CircleDollarSign, requiredPermission: 'reports.financial' },
+        { id: 'reportes', label: 'Reportes', icon: BarChart3, requiredPermission: 'reports.operational' }
       ]
     },
     {
@@ -77,7 +93,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
           icon: Heart,
           badge: rewardsAvailableCount > 0 ? String(rewardsAvailableCount) : undefined,
           badgeTone: 'emerald',
-          badgeTitle: `${rewardsAvailableCount} recompensas listas para canje`
+          badgeTitle: `${rewardsAvailableCount} recompensas listas para canje`,
+          requiredPermission: 'customers.view'
         },
         { id: 'vista_cliente', label: 'Vista del cliente', icon: Smartphone }
       ]
@@ -85,16 +102,45 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
     {
       label: 'Herramientas',
       items: [
-        { id: 'asistente', label: 'Asistente CODIA', icon: Bot, badge: 'IA', badgeTone: 'blue', badgeTitle: 'Asistente con respuestas automáticas' },
-        { id: 'configuracion', label: 'Configuración', icon: Settings }
+        {
+          id: 'asistente',
+          label: 'Asistente CODIA',
+          icon: Bot,
+          badge: 'IA',
+          badgeTone: 'blue',
+          badgeTitle: 'Asistente con respuestas automáticas',
+          requiredPermission: 'reports.operational'
+        },
+        { id: 'configuracion', label: 'Configuración', icon: Settings, requiredPermission: 'settings.manage' }
       ]
     }
   ];
+
+  // Filtrar módulos visibles según los permisos del usuario activo
+  const groups = rawGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !item.requiredPermission || hasPermission(item.requiredPermission))
+    }))
+    .filter((group) => group.items.length > 0);
 
   const handleSelectTab = (tabId: string) => {
     setActiveTab(tabId);
     setSubTab('');
     if (onSelect) onSelect();
+  };
+
+  const handleRoleChange = (role: UserRole) => {
+    switchRole(role);
+    setShowRoleMenu(false);
+  };
+
+  const roleLabelMap: Record<UserRole, string> = {
+    superadmin: 'Superadministrador CODIA',
+    administrador: 'Administradora',
+    encargado: 'Encargado de Sucursal',
+    empleado: 'Empleado / Cajero',
+    cliente: 'Cliente'
   };
 
   return (
@@ -113,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
         <div className="leading-tight">
           <div className="font-bold text-slate-900 text-sm tracking-wide flex items-center gap-1.5">
             <span>CODIA</span>
-            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-mono">POS</span>
+            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-mono">BETA</span>
           </div>
           <div className="text-[11px] text-slate-500">Gestión de cafetería</div>
         </div>
@@ -159,21 +205,62 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
         ))}
       </nav>
 
-      {/* Usuario activo */}
-      <div className="p-4 border-t border-slate-200 flex items-center gap-3 shrink-0">
-        <div className="relative shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
-            alt="Laura Méndez"
-            className="w-9 h-9 rounded-full object-cover"
-          />
-          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-slate-100" />
-        </div>
-        <div className="min-w-0 leading-tight">
-          <div className="text-sm font-medium text-slate-900 truncate">Laura Méndez</div>
-          <div className="text-[11px] text-slate-500 truncate">Administradora · v0.1 demo</div>
-        </div>
+      {/* Selector de rol de demo y usuario activo */}
+      <div className="p-3 border-t border-slate-200 shrink-0 relative bg-slate-50">
+        <button
+          type="button"
+          onClick={() => setShowRoleMenu((v) => !v)}
+          className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/70 transition-colors text-left"
+          title="Cambiar rol para pruebas de la demo"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="relative shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={currentUser.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'}
+                alt={currentUser.name}
+                className="w-8 h-8 rounded-full object-cover"
+              />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-slate-100" />
+            </div>
+            <div className="min-w-0 leading-tight">
+              <div className="text-xs font-semibold text-slate-900 truncate">{currentUser.name}</div>
+              <div className="text-[10px] text-blue-600 font-medium truncate flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 inline" />
+                <span>{roleLabelMap[currentUser.role]}</span>
+              </div>
+            </div>
+          </div>
+          <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${showRoleMenu ? 'rotate-180' : ''}`} />
+        </button>
+
+        {showRoleMenu && (
+          <div className="absolute bottom-full left-2 right-2 mb-2 bg-white rounded-xl shadow-xl border border-slate-200 p-2 z-50">
+            <div className="text-[10px] font-bold text-slate-400 uppercase px-2 py-1 tracking-wider">
+              Simular Rol en Demo
+            </div>
+            <div className="space-y-1 mt-1">
+              {demoUsers.map((user) => {
+                const isSelected = currentUser.role === user.role;
+                return (
+                  <button
+                    key={user.id}
+                    onClick={() => handleRoleChange(user.role)}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
+                      isSelected ? 'bg-blue-50 text-blue-700 font-bold' : 'hover:bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    <div>
+                      <div className="font-medium">{user.name}</div>
+                      <div className="text-[10px] text-slate-400">{roleLabelMap[user.role]}</div>
+                    </div>
+                    {isSelected && <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-mono">Activo</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

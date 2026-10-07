@@ -1,0 +1,289 @@
+{
+  "project": "CODIA Cafeterías Beta",
+  "repository": "https://github.com/VictorCD20/mvp_cafeteria.git",
+  "startedAt": "2026-10-07T11:09:59-06:00",
+  "updatedAt": "2026-10-07T12:11:30-06:00",
+  "currentPhase": "etapa-5-estabilizacion-y-pruebas",
+  "initialState": {
+    "branch": "main",
+    "commit": "HEAD",
+    "typecheck": {
+      "status": "passed",
+      "details": "npx tsc --noEmit completado con 0 errores"
+    },
+    "lint": {
+      "status": "failed",
+      "errors": 7,
+      "warnings": 55,
+      "details": "7 errores y 55 advertencias en código heredado previo a esta etapa"
+    },
+    "tests": {
+      "status": "passed",
+      "details": "25 pruebas automatizadas ejecutadas y aprobadas (npm test / Node 24 native test runner)"
+    },
+    "build": {
+      "status": "passed",
+      "details": "npm run build completado con éxito en 1.3s (Next.js 16.3.8 Turbopack)"
+    }
+  },
+  "requirements": [
+    {
+      "id": "REQ-01",
+      "title": "Auditoría exhaustiva del repositorio y estado inicial",
+      "status": "passed",
+      "details": "Revisión completa de tipos, seedData, contexto, vistas, lib de negocio y flujo de rutas."
+    },
+    {
+      "id": "REQ-02",
+      "title": "Configuración modular centralizada y datos iniciales en JSON",
+      "status": "passed",
+      "details": "Creado src/config/codia-beta.json y migrados los datos de seedData.ts a 14 archivos JSON en src/data/ con respaldo en seedData.backup.ts."
+    },
+    {
+      "id": "REQ-03",
+      "title": "Registro JSON de seguimiento de implementación",
+      "status": "passed",
+      "details": "Actualizado docs/implementation-status.json con métricas reales de ejecución y respaldo."
+    },
+    {
+      "id": "REQ-04",
+      "title": "Control de Acceso y Roles (Superadmin, Administrador, Encargado, Empleado, Cliente)",
+      "status": "passed",
+      "details": "Implementado sistema de roles y permisos en CodiaContext, navegación condicional en Sidebar, protección de vistas en page.tsx, aislamiento en /cliente y guardas de seguridad en funciones internas."
+    },
+    {
+      "id": "REQ-05",
+      "title": "Flujo de POS con validaciones estrictas y promociones",
+      "status": "passed",
+      "details": "Implementadas validaciones de carrito no vacío, cantidades positivas y enteras, bloqueo de productos no disponibles, protección contra doble clic / cobro duplicado y generación de folios consecutivos basados en el mayor existente."
+    },
+    {
+      "id": "REQ-06",
+      "title": "Inventario con registro formal de movimientos",
+      "status": "passed",
+      "details": "Implementados tipos formales de movimiento (entrada, compra, consumo_venta, merma, ajuste_positivo, ajuste_negativo, devolucion, cancelacion), costeo por movimiento y trazabilidad con responsable y ticket de venta."
+    },
+    {
+      "id": "REQ-07",
+      "title": "Cliente Consentido y Lealtad basada en movimientos (Libro Mayor)",
+      "status": "passed",
+      "details": "Libro mayor de movimientos de fidelidad (sello_ganado, bonificacion, canje, ajuste) con trazabilidad de saldo anterior, saldo nuevo, ticket de venta y usuario responsable."
+    },
+    {
+      "id": "REQ-08",
+      "title": "Bitácora de Auditoría de Operaciones Sensibles (Solo Lectura)",
+      "status": "passed",
+      "details": "Registro inmutable de solo lectura para eventos de auditoría (descuentos, mermas, ajustes de stock, cambios de rol/perfil, canjes y personal), sin capacidades de edición o borrado."
+    },
+    {
+      "id": "REQ-09",
+      "title": "Suite de Pruebas Automatizadas Básicas",
+      "status": "passed",
+      "details": "25 pruebas automatizadas cubriendo promociones, timezone de México, cálculo de recetas, detección de faltantes, matriz de permisos RBAC, validaciones de payload POS y transiciones de lealtad."
+    }
+  ],
+  "modules": [
+    { "key": "auth", "status": "implemented" },
+    { "key": "catalog", "status": "implemented" },
+    { "key": "pos", "status": "implemented" },
+    { "key": "cash", "status": "configured" },
+    { "key": "inventory", "status": "implemented" },
+    { "key": "customers", "status": "implemented" },
+    { "key": "loyalty", "status": "implemented" },
+    { "key": "promotions", "status": "implemented" },
+    { "key": "employees", "status": "implemented" },
+    { "key": "finances", "status": "implemented" },
+    { "key": "reports", "status": "implemented" },
+    { "key": "assistant", "status": "implemented" },
+    { "key": "settings", "status": "implemented" },
+    { "key": "audit", "status": "implemented" }
+  ],
+  "roles": [
+    { "id": "superadmin", "status": "implemented" },
+    { "id": "administrador", "status": "implemented" },
+    { "id": "encargado", "status": "implemented" },
+    { "id": "empleado", "status": "implemented" },
+    { "id": "cliente", "status": "implemented" }
+  ],
+  "permissions": [
+    "sales.create",
+    "sales.view_own",
+    "sales.view_branch",
+    "sales.cancel",
+    "sales.discount",
+    "cash.open",
+    "cash.close",
+    "cash.adjust",
+    "inventory.view",
+    "inventory.receive",
+    "inventory.count",
+    "inventory.adjust",
+    "inventory.waste",
+    "customers.create",
+    "customers.view",
+    "customers.view_own",
+    "loyalty.adjust",
+    "loyalty.redeem",
+    "loyalty.view_own",
+    "employees.view",
+    "employees.manage",
+    "attendance.review",
+    "reports.operational",
+    "reports.financial",
+    "settings.manage",
+    "users.manage",
+    "roles.manage",
+    "audit.view"
+  ],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "topic": "Ubicación de configuración modular",
+      "decision": "Definir src/config/codia-beta.json como la fuente de verdad de configuración estática para la beta.",
+      "rationale": "Permite separar configuración de lógica de componentes y preparar la transición limpia a Supabase."
+    },
+    {
+      "id": "DEC-002",
+      "topic": "Conservación del estado en memoria",
+      "decision": "Mantener CodiaContext como orquestador de estado operativo en memoria durante esta fase sin romper flujos.",
+      "rationale": "Garantiza navegación fluida sin recargas y respeta la arquitectura actual del MVP."
+    },
+    {
+      "id": "DEC-003",
+      "topic": "Migración modular de datos de prueba",
+      "decision": "Separar seedData en archivos JSON temáticos y hacer que seedData.ts importe y tipifique estos archivos con respaldo en seedData.backup.ts.",
+      "rationale": "Mantiene cero regresiones en los componentes existentes mientras modulariza los datos fuente."
+    },
+    {
+      "id": "DEC-004",
+      "topic": "Control de Acceso y Selector para Demo",
+      "decision": "Implementar ActiveUser y hasPermission con verificación doble (en UI y en métodos de estado), habilitando selector rápido de demoUsers para validar los 5 perfiles.",
+      "rationale": "Permite demostrar el comportamiento de permisos sin requerir backend ni romper la agilidad de la demo."
+    },
+    {
+      "id": "DEC-005",
+      "topic": "Robustecimiento e Idempotencia del POS",
+      "decision": "Implementar estado de procesamiento síncrono/async, debounce anti-doble clic en UI y cálculo determinista de folios consecutivos basados en el mayor entero registrado.",
+      "rationale": "Evita tickets duplicados, folios colisionados y ventas no deseadas ante clics repetidos."
+    },
+    {
+      "id": "DEC-006",
+      "topic": "Procesos Conectados y Trazabilidad Operativa",
+      "decision": "Conectar formalmente las mutaciones de ventas, stock y fidelidad a tres libros de registro: movimientos de inventario tipificados, libro mayor de lealtad y bitácora de auditoría.",
+      "rationale": "Garantiza que toda operación sensible o movimiento físico tenga un registro inmutable con usuario responsable, motivo y folio asociado."
+    },
+    {
+      "id": "DEC-007",
+      "topic": "Estabilización y Pruebas Automatizadas Nativas",
+      "decision": "Integrar suite de 25 pruebas unitarias con Node.js test runner nativo sobre TypeScript sin dependencias pesadas adicionales.",
+      "rationale": "Permite validar exhaustivamente las reglas de negocio críticas (promociones, inventario, permisos, POS) de manera rápida y reproducible."
+    }
+  ],
+  "changes": [
+    {
+      "phase": "Etapa 1 - Auditoría y Configuración",
+      "description": "Creación del esquema de configuración JSON y archivo de seguimiento de estado de implementación."
+    },
+    {
+      "phase": "Etapa 2 - Migración de Datos a JSON",
+      "description": "Extracción y tipado de categories.json, employees.json, ingredients.json, products.json, recipes.json, customers.json, promotions.json, attendance.json, sales.json, expenses.json, movements.json, suppliers.json con respaldo de seedData.ts."
+    },
+    {
+      "phase": "Etapa 3 - Control de Acceso, Roles y Permisos",
+      "description": "Adición de tipos UserRole, Permission, ActiveUser; implementación de hasPermission y switchRole en CodiaContext; filtrado de módulos en Sidebar; protección de vistas en page.tsx; aislamiento de /cliente; guardas de seguridad en métodos de mutación."
+    },
+    {
+      "phase": "Etapa 4 - Robustecimiento del Punto de Venta (POS)",
+      "description": "Validación de carrito no vacío, cantidades positivas, verificación de disponibilidad de productos en catálogo, protección contra doble clic en PosView y generación consecutiva de folios en registerSale."
+    },
+    {
+      "phase": "Etapa 5 - Procesos Conectados (Inventario, Lealtad, Auditoría)",
+      "description": "Formalización de tipos de movimiento de inventario con responsable y costeo; libro mayor de movimientos de lealtad con sellos, bonificaciones y canjes; bitácora de auditoría para descuentos, mermas, ajustes, cambios de rol y altas de personal."
+    },
+    {
+      "phase": "Etapa 5B - Estabilización y Pruebas Automatizadas",
+      "description": "Creación de suite de 25 pruebas unitarias en tests/*.test.ts; verificación de solo-lectura en bitácora de auditoría; pruebas manuales del circuito POS → Inventario → Lealtad → Auditoría; validación completa con npx tsc, npm test y npm run build."
+    }
+  ],
+  "filesModified": [
+    "src/types/index.ts",
+    "src/lib/promotions.ts",
+    "src/lib/inventory.ts",
+    "src/context/CodiaContext.tsx",
+    "src/components/inventory/InventoryView.tsx",
+    "src/components/loyalty/LoyaltyView.tsx",
+    "src/components/settings/SettingsView.tsx",
+    "tests/promotions.test.ts",
+    "tests/inventory.test.ts",
+    "tests/access-control.test.ts",
+    "tests/pos-validation.test.ts",
+    "tests/connected-processes.test.ts",
+    "package.json",
+    "tsconfig.json",
+    "docs/implementation-status.json"
+  ],
+  "validations": [
+    {
+      "type": "typecheck",
+      "command": "npx tsc --noEmit",
+      "result": "passed",
+      "timestamp": "2026-10-07T12:10:20Z"
+    },
+    {
+      "type": "unit-tests",
+      "command": "npm test",
+      "result": "passed",
+      "details": "25/25 pruebas pasaron con éxito en 366ms",
+      "timestamp": "2026-10-07T12:10:32Z"
+    },
+    {
+      "type": "build",
+      "command": "npm run build",
+      "result": "passed",
+      "details": "Build estático de producción completado en 1.3s con Turbopack",
+      "timestamp": "2026-10-07T12:10:51Z"
+    },
+    {
+      "type": "lint",
+      "command": "npm run lint",
+      "result": "failed",
+      "details": "7 errores heredados en código previo; typecheck, unit-tests y build pasan limpiamente",
+      "timestamp": "2026-10-07T11:12:09Z"
+    }
+  ],
+  "pendingItems": [
+    "Preparación de contratos y esquema de base de datos para Supabase (siguiente etapa tras validación del usuario)."
+  ],
+  "knownLimitations": [
+    "Persistencia en memoria: los datos modificados en tiempo de ejecución se reinician al recargar la página (F5) hasta la integración con Supabase.",
+    "Folios consecutivos en memoria: el cálculo actual de folios está optimizado para la demo de caja única en memoria; en un entorno multi-caja distribuido se requerirá una secuencia o atomicidad a nivel base de datos.",
+    "Auditoría en memoria: los registros de la bitácora son inmutables durante la sesión activa pero no persistirán tras recargas hasta conectar la base de datos.",
+    "Integraciones externas simuladas (Hikvision, PAC CFDI, Google Wallet, Asistente IA)."
+  ],
+  "finalVerification": {
+    "status": "passed",
+    "requested": [
+      "Verificar manualmente POS → inventario → lealtad → auditoría",
+      "Probar descuentos, mermas, ajustes y canjes",
+      "Confirmar que el empleado no pueda modificar funciones restringidas",
+      "Añadir pruebas automatizadas básicas",
+      "Revisar que la auditoría sea realmente de solo lectura",
+      "Mantener documentado que los folios y movimientos todavía son únicamente para una caja y memoria local",
+      "No presentar la auditoría como persistente hasta conectar una base de datos"
+    ],
+    "implemented": [
+      "Circuito cerrado verificado: Venta POS descuenta recetas (consumo_venta), abona al libro mayor de lealtad y genera auditoría de descuento",
+      "Operaciones de mermas, ajustes y canjes verificadas con emisión de eventos formales",
+      "Matriz RBAC validada: empleado restringido de inventario, personal, finanzas, configuración y auditoría",
+      "Suite automatizada de 25 pruebas unitarias implementada y aprobada (npm test)",
+      "Bitácora de auditoría asegurada como solo-lectura sin endpoints de mutación ni borrado",
+      "Limitaciones de concurrencia y persistencia documentadas con total transparencia",
+      "Verificación técnica completa: tsc (0 errores), 25/25 tests aprobados, build exitoso"
+    ],
+    "notImplemented": [
+      "Conexión a Supabase (pospuesta para la siguiente etapa de persistencia)"
+    ],
+    "regressionsDetected": [],
+    "summary": "Fase de estabilización y pruebas completada exitosamente: el sistema está sólido, validado y listo para iniciar la preparación de persistencia con Supabase."
+  }
+}

@@ -1,0 +1,16 @@
+[
+  { "id": "ing-1", "name": "Café Molido de Especialidad", "unit": "g", "currentStock": 4500, "minStock": 1000, "costPerUnit": 0.35, "category": "granos" },
+  { "id": "ing-2", "name": "Leche Entera Organica", "unit": "ml", "currentStock": 18000, "minStock": 5000, "costPerUnit": 0.025, "category": "lacteos" },
+  { "id": "ing-3", "name": "Leche Deslactosada Light", "unit": "ml", "currentStock": 12000, "minStock": 4000, "costPerUnit": 0.028, "category": "lacteos" },
+  { "id": "ing-4", "name": "Azúcar Morena Especial", "unit": "g", "currentStock": 3000, "minStock": 800, "costPerUnit": 0.04, "category": "granos" },
+  { "id": "ing-5", "name": "Vasos Medianos 12oz", "unit": "pza", "currentStock": 120, "minStock": 200, "costPerUnit": 2.50, "category": "desechables" },
+  { "id": "ing-6", "name": "Vasos Grandes 16oz", "unit": "pza", "currentStock": 350, "minStock": 150, "costPerUnit": 3.10, "category": "desechables" },
+  { "id": "ing-7", "name": "Tapas Universales", "unit": "pza", "currentStock": 480, "minStock": 200, "costPerUnit": 1.20, "category": "desechables" },
+  { "id": "ing-8", "name": "Jarabe de Chocolate Artesanal", "unit": "ml", "currentStock": 1500, "minStock": 500, "costPerUnit": 0.12, "category": "jarabes" },
+  { "id": "ing-9", "name": "Jarabe Vainilla Bourbon", "unit": "ml", "currentStock": 400, "minStock": 600, "costPerUnit": 0.15, "category": "jarabes" },
+  { "id": "ing-10", "name": "Té Chai Mix Concentrado", "unit": "g", "currentStock": 2500, "minStock": 800, "costPerUnit": 0.22, "category": "granos" },
+  { "id": "ing-11", "name": "Pan de Croissant Mantequilla", "unit": "pza", "currentStock": 25, "minStock": 10, "costPerUnit": 12.00, "category": "panaderia" },
+  { "id": "ing-12", "name": "Pan Ciabatta Panini", "unit": "pza", "currentStock": 18, "minStock": 10, "costPerUnit": 14.00, "category": "panaderia" },
+  { "id": "ing-13", "name": "Queso Gouda Rebanado", "unit": "g", "currentStock": 1200, "minStock": 500, "costPerUnit": 0.18, "category": "perecederos" },
+  { "id": "ing-14", "name": "Jamón Selva Negra", "unit": "g", "currentStock": 1500, "minStock": 500, "costPerUnit": 0.22, "category": "perecederos" }
+]

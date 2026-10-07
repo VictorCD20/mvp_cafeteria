@@ -1,4 +1,5 @@
-import { Client, Product, Promotion } from '../types';
+import type { Client, Product, Promotion } from '../types';
+
 
 export interface CartLine {
   product: Product;
