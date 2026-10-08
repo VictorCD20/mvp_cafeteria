@@ -23,10 +23,12 @@ import {
   BotMessage,
   ActiveUser,
   UserRole,
-  Permission
+  Permission,
+  AppearanceConfig
 } from '../types';
 
 import codiaBetaConfig from '../config/codia-beta.json';
+import { applyThemeToDOM, defaultAppearanceConfig } from '../lib/theme';
 
 import {
   initialConfig,
@@ -96,6 +98,8 @@ export const demoUsers: ActiveUser[] = [
 interface CodiaContextType {
   config: SystemConfig;
   updateConfig: (newConfig: Partial<SystemConfig>) => void;
+  updateAppearance: (newAppearance: Partial<AppearanceConfig>) => void;
+  resetAppearance: () => void;
   
   // Auth & Roles
   currentUser: ActiveUser;
@@ -106,7 +110,7 @@ interface CodiaContextType {
 
   // Navigation State
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab: (tab: string, sub?: string) => void;
   subTab: string;
   setSubTab: (sub: string) => void;
   
@@ -253,11 +257,12 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const setActiveTab = (tab: string) => {
+  const setActiveTab = (tab: string, sub?: string) => {
     const targetTab = validTabs.includes(tab) ? tab : 'inicio';
+    const targetSub = sub !== undefined ? sub : '';
     setActiveTabState(targetTab);
-    setSubTabState('');
-    updateUrlNav(targetTab, '');
+    setSubTabState(targetSub);
+    updateUrlNav(targetTab, targetSub);
   };
 
   const setSubTab = (sub: string) => {
@@ -1217,8 +1222,58 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
     }, 500);
   };
 
+  // Sincronizar tema y densidad con el DOM al montar y al cambiar apariencia
+  useEffect(() => {
+    if (config.appearance) {
+      applyThemeToDOM(config.appearance);
+    }
+  }, [config.appearance]);
+
+  const updateAppearance = (newAppearance: Partial<AppearanceConfig>) => {
+    if (!hasPermission('settings.manage')) {
+      showToast('Acceso denegado: solo administradores pueden cambiar la apariencia y temas.');
+      return;
+    }
+    setConfig((prev) => {
+      const baseAppearance: AppearanceConfig = prev.appearance || defaultAppearanceConfig;
+      const updatedAppearance: AppearanceConfig = {
+        ...baseAppearance,
+        ...newAppearance,
+        customColors: {
+          ...baseAppearance.customColors,
+          ...(newAppearance.customColors || {})
+        },
+        presets: {
+          ...baseAppearance.presets,
+          ...(newAppearance.presets || {})
+        }
+      };
+      applyThemeToDOM(updatedAppearance);
+      return { ...prev, appearance: updatedAppearance };
+    });
+    logAuditEvent('configuracion', `Cambio de tema visual a "${newAppearance.activeTheme || config.appearance?.activeTheme || 'cafe'}"`);
+    showToast('Apariencia y tema actualizados con éxito');
+  };
+
+  const resetAppearance = () => {
+    if (!hasPermission('settings.manage')) {
+      showToast('Acceso denegado: solo administradores pueden restaurar la apariencia.');
+      return;
+    }
+    setConfig((prev) => {
+      const defaultApp = defaultAppearanceConfig;
+      applyThemeToDOM(defaultApp);
+      return { ...prev, appearance: defaultApp };
+    });
+    logAuditEvent('configuracion', 'Restauración del tema visual a valores predeterminados');
+    showToast('Tema predeterminado restaurado');
+  };
+
   const resetToSeedData = () => {
     setConfig(initialConfig);
+    if (initialConfig.appearance) {
+      applyThemeToDOM(initialConfig.appearance);
+    }
     setEmployees(initialEmployees);
     setAttendance(initialAttendance);
     setIngredients(initialIngredients);
@@ -1240,6 +1295,8 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
       value={{
         config,
         updateConfig,
+        updateAppearance,
+        resetAppearance,
         currentUser,
         setCurrentUser,
         switchRole,

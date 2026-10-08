@@ -192,6 +192,38 @@ export interface Promotion {
   bonusStamps?: number;
 }
 
+export type ThemePresetKey = 'cafe' | 'neutro' | 'oscuro' | 'alto_contraste' | 'personalizado';
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type VisualDensity = 'comfortable' | 'compact';
+export type BrandLogoType = 'coffee' | 'cup' | 'flame' | 'sparkles' | 'store';
+
+export interface ThemeColors {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  surface: string;
+  foreground: string;
+  button: string;
+}
+
+export interface ThemePreset extends ThemeColors {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface AppearanceConfig {
+  activeTheme: ThemePresetKey;
+  allowCustomTheme: boolean;
+  mode: ThemeMode;
+  density: VisualDensity;
+  brandName: string;
+  brandLogo: BrandLogoType;
+  customColors: ThemeColors;
+  presets: Record<string, ThemePreset>;
+}
+
 export interface SystemConfig {
   cafeteriaName: string;
   branchName: string;
@@ -202,6 +234,7 @@ export interface SystemConfig {
   address: string;
   phone: string;
   logoText: string;
+  appearance?: AppearanceConfig;
 }
 
 export type InventoryMovementType =

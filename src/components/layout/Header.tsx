@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
         )}
         <div className="flex items-center gap-2 min-w-0 text-sm">
           <Building2 className="w-4 h-4 text-blue-500 shrink-0" />
-          <span className="font-semibold text-slate-900 dark:text-white truncate">{config.cafeteriaName}</span>
+          <span className="font-semibold text-slate-900 dark:text-white truncate">{config.appearance?.brandName || config.cafeteriaName}</span>
           <span className="hidden md:inline text-slate-500 truncate">· {config.branchName}</span>
         </div>
 

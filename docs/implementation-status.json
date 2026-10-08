@@ -3,7 +3,7 @@
   "repository": "https://github.com/VictorCD20/mvp_cafeteria.git",
   "startedAt": "2026-10-07T11:09:59-06:00",
   "updatedAt": "2026-10-07T12:11:30-06:00",
-  "currentPhase": "etapa-5-estabilizacion-y-pruebas",
+  "currentPhase": "etapa-6-apariencia-configurable",
   "initialState": {
     "branch": "main",
     "commit": "HEAD",
@@ -19,11 +19,11 @@
     },
     "tests": {
       "status": "passed",
-      "details": "25 pruebas automatizadas ejecutadas y aprobadas (npm test / Node 24 native test runner)"
+      "details": "29 pruebas automatizadas ejecutadas y aprobadas (npm test / Node 24 native test runner)"
     },
     "build": {
       "status": "passed",
-      "details": "npm run build completado con éxito en 1.3s (Next.js 16.3.8 Turbopack)"
+      "details": "npm run build completado con éxito en Turbopack"
     }
   },
   "requirements": [
@@ -79,7 +79,13 @@
       "id": "REQ-09",
       "title": "Suite de Pruebas Automatizadas Básicas",
       "status": "passed",
-      "details": "25 pruebas automatizadas cubriendo promociones, timezone de México, cálculo de recetas, detección de faltantes, matriz de permisos RBAC, validaciones de payload POS y transiciones de lealtad."
+      "details": "29 pruebas automatizadas cubriendo promociones, timezone de México, cálculo de recetas, detección de faltantes, matriz de permisos RBAC, validaciones de payload POS, transiciones de lealtad y temas/apariencia."
+    },
+    {
+      "id": "REQ-10",
+      "title": "Apariencia Configurable y Temas Dinámicos",
+      "status": "passed",
+      "details": "Implementada sección appearance en codia-beta.json con temas predeterminados (cafe, neutro, oscuro, alto_contraste), variables CSS globales (--app-*), selector de densidad (cómoda/compacta), selector de modo (claro/oscuro/auto), vista previa en vivo y control de acceso (solo admin/superadmin)."
     }
   ],
   "modules": [
@@ -96,6 +102,7 @@
     { "key": "reports", "status": "implemented" },
     { "key": "assistant", "status": "implemented" },
     { "key": "settings", "status": "implemented" },
+    { "key": "appearance", "status": "implemented" },
     { "key": "audit", "status": "implemented" }
   ],
   "roles": [

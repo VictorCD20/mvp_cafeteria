@@ -24,7 +24,8 @@ export const initialConfig: SystemConfig = {
   taxRate: codiaBetaConfig.sales.defaultTaxRate,
   address: mainBranch ? mainBranch.address : 'Av. Reforma 402, Col. Juárez, CDMX',
   phone: mainBranch ? mainBranch.phone : '55 1234 5678',
-  logoText: 'CODIA'
+  logoText: 'CODIA',
+  appearance: codiaBetaConfig.appearance as unknown as SystemConfig['appearance']
 };
 
 export const initialEmployees: Employee[] = employeesData as Employee[];

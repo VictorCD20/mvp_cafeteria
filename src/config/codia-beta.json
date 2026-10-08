@@ -293,5 +293,72 @@
     "enableAiAssistantSimulation": true,
     "enableDemoFridayToggle": true,
     "enforceStrictInventoryValidation": true
+  },
+  "appearance": {
+    "activeTheme": "cafe",
+    "allowCustomTheme": true,
+    "mode": "light",
+    "density": "comfortable",
+    "brandName": "CODIA Cafetería Gourmet",
+    "brandLogo": "coffee",
+    "customColors": {
+      "primary": "#7A4B2A",
+      "secondary": "#D9A66B",
+      "accent": "#F2C078",
+      "background": "#FAF7F2",
+      "surface": "#FFFFFF",
+      "foreground": "#2D211B",
+      "button": "#7A4B2A"
+    },
+    "presets": {
+      "cafe": {
+        "id": "cafe",
+        "name": "Café Cálido",
+        "description": "Tonos cálidos, moca y caramelo natural",
+        "primary": "#7A4B2A",
+        "secondary": "#D9A66B",
+        "accent": "#F2C078",
+        "background": "#FAF7F2",
+        "surface": "#FFFFFF",
+        "foreground": "#2D211B",
+        "button": "#7A4B2A"
+      },
+      "neutro": {
+        "id": "neutro",
+        "name": "Neutro Moderno",
+        "description": "Apariencia limpia, sobria y profesional",
+        "primary": "#334155",
+        "secondary": "#64748B",
+        "accent": "#CBD5E1",
+        "background": "#F8FAFC",
+        "surface": "#FFFFFF",
+        "foreground": "#0F172A",
+        "button": "#334155"
+      },
+      "oscuro": {
+        "id": "oscuro",
+        "name": "Modo Oscuro Profundo",
+        "description": "Interfaz oscura para ambientes de poca luz",
+        "primary": "#A0683F",
+        "secondary": "#D5B38D",
+        "accent": "#F2C078",
+        "background": "#121212",
+        "surface": "#1E1E1E",
+        "foreground": "#F5EFE6",
+        "button": "#A0683F"
+      },
+      "alto_contraste": {
+        "id": "alto_contraste",
+        "name": "Alto Contraste",
+        "description": "Accesibilidad reforzada con máxima distinción de elementos",
+        "primary": "#000000",
+        "secondary": "#1E293B",
+        "accent": "#FACC15",
+        "background": "#FFFFFF",
+        "surface": "#F1F5F9",
+        "foreground": "#000000",
+        "button": "#000000"
+      }
+    }
   }
 }

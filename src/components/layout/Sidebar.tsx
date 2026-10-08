@@ -13,6 +13,10 @@ import {
   BarChart3,
   Settings,
   Coffee,
+  CupSoda,
+  Flame,
+  Sparkles,
+  Store,
   Smartphone,
   ChevronDown,
   ShieldCheck,
@@ -43,6 +47,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
   const {
+    config,
     activeTab,
     setActiveTab,
     setSubTab,
@@ -153,15 +158,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
     >
       {/* Marca */}
       <div className="px-5 h-16 border-b border-slate-200 flex items-center gap-3 shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white">
-          <Coffee className="w-5 h-5" />
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-sm">
+          {config.appearance?.brandLogo === 'cup' && <CupSoda className="w-5 h-5" />}
+          {config.appearance?.brandLogo === 'flame' && <Flame className="w-5 h-5" />}
+          {config.appearance?.brandLogo === 'sparkles' && <Sparkles className="w-5 h-5" />}
+          {config.appearance?.brandLogo === 'store' && <Store className="w-5 h-5" />}
+          {(!config.appearance?.brandLogo || config.appearance?.brandLogo === 'coffee') && <Coffee className="w-5 h-5" />}
         </div>
-        <div className="leading-tight">
-          <div className="font-bold text-slate-900 text-sm tracking-wide flex items-center gap-1.5">
-            <span>CODIA</span>
-            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-mono">BETA</span>
+        <div className="leading-tight min-w-0">
+          <div className="font-bold text-slate-900 text-sm tracking-wide flex items-center gap-1.5 truncate">
+            <span className="truncate">{config.appearance?.brandName || 'CODIA'}</span>
+            <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-mono shrink-0">BETA</span>
           </div>
-          <div className="text-[11px] text-slate-500">Gestión de cafetería</div>
+          <div className="text-[11px] text-slate-500 truncate">{config.branchName}</div>
         </div>
       </div>
 

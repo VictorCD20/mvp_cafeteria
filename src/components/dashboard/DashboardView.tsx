@@ -53,12 +53,25 @@ const LinkButton = ({ label, onClick }: { label: string; onClick: () => void }) 
 );
 
 export const DashboardView = () => {
-  const { sales, expenses, attendance, employees, ingredients, clients, setActiveTab, setSubTab } = useCodia();
+  const {
+    sales,
+    expenses,
+    attendance,
+    employees,
+    ingredients,
+    clients,
+    setActiveTab,
+    hasPermission,
+    showToast
+  } = useCodia();
   const [showAllStaff, setShowAllStaff] = useState(false);
 
   const goTo = (tab: string, sub?: string) => {
-    setActiveTab(tab);
-    setSubTab(sub || '');
+    if (tab === 'finanzas' && !hasPermission('reports.financial')) {
+      showToast('Acceso restringido: Se requiere permiso de Administrador para ver Finanzas y OCR.');
+      return;
+    }
+    setActiveTab(tab, sub);
   };
 
   // Métricas
