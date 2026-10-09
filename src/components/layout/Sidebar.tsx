@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCodia } from '../../context/CodiaContext';
+import { useModuleState } from '../../context/ModuleStateContext';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -32,6 +33,7 @@ interface NavItem {
   badgeTone?: 'amber' | 'emerald' | 'blue';
   badgeTitle?: string;
   requiredPermission?: Permission;
+  moduleKey?: string;
 }
 
 const badgeTones = {
@@ -44,6 +46,19 @@ interface SidebarProps {
   onSelect?: () => void;
   isMobile?: boolean;
 }
+
+const tabModuleMap: Record<string, string> = {
+  ventas: 'pos',
+  inventario: 'inventory',
+  empleados: 'employees',
+  finanzas: 'finances',
+  finances: 'finances',
+  reportes: 'reports',
+  cliente_consentido: 'loyalty',
+  vista_cliente: 'customers',
+  asistente: 'assistant',
+  configuracion: 'settings'
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
   const {
@@ -59,7 +74,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
     demoUsers
   } = useCodia();
 
+  const { isModuleActive } = useModuleState();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
+
+  // Redirigir a inicio si el módulo de la pestaña actual se desactiva
+  useEffect(() => {
+    const requiredMod = tabModuleMap[activeTab];
+    if (requiredMod && !isModuleActive(requiredMod)) {
+      setActiveTab('inicio');
+    }
+  }, [activeTab, isModuleActive, setActiveTab]);
 
   const lowStockCount = ingredients.filter((i) => i.currentStock <= i.minStock).length;
   const rewardsAvailableCount = clients.filter((c) => c.rewardsAvailable > 0).length;
@@ -69,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
       label: 'Operación diaria',
       items: [
         { id: 'inicio', label: 'Inicio', icon: LayoutDashboard, requiredPermission: 'sales.view_own' },
-        { id: 'ventas', label: 'Ventas (POS)', icon: ShoppingCart, requiredPermission: 'sales.create' },
+        { id: 'ventas', label: 'Ventas (POS)', icon: ShoppingCart, requiredPermission: 'sales.create', moduleKey: 'pos' },
         {
           id: 'inventario',
           label: 'Inventario y recetas',
@@ -77,16 +101,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
           badge: lowStockCount > 0 ? String(lowStockCount) : undefined,
           badgeTone: 'amber',
           badgeTitle: `${lowStockCount} insumos con stock bajo`,
-          requiredPermission: 'inventory.view'
+          requiredPermission: 'inventory.view',
+          moduleKey: 'inventory'
         }
       ]
     },
     {
       label: 'Equipo y finanzas',
       items: [
-        { id: 'empleados', label: 'Empleados y pre-nómina', icon: Users, requiredPermission: 'employees.view' },
-        { id: 'finanzas', label: 'Finanzas y OCR', icon: CircleDollarSign, requiredPermission: 'reports.financial' },
-        { id: 'reportes', label: 'Reportes', icon: BarChart3, requiredPermission: 'reports.operational' }
+        { id: 'empleados', label: 'Empleados y pre-nómina', icon: Users, requiredPermission: 'employees.view', moduleKey: 'employees' },
+        { id: 'finanzas', label: 'Finanzas y OCR', icon: CircleDollarSign, requiredPermission: 'reports.financial', moduleKey: 'finances' },
+        { id: 'reportes', label: 'Reportes', icon: BarChart3, requiredPermission: 'reports.operational', moduleKey: 'reports' }
       ]
     },
     {
@@ -99,9 +124,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
           badge: rewardsAvailableCount > 0 ? String(rewardsAvailableCount) : undefined,
           badgeTone: 'emerald',
           badgeTitle: `${rewardsAvailableCount} recompensas listas para canje`,
-          requiredPermission: 'customers.view'
+          requiredPermission: 'customers.view',
+          moduleKey: 'loyalty'
         },
-        { id: 'vista_cliente', label: 'Vista del cliente', icon: Smartphone }
+        { id: 'vista_cliente', label: 'Vista del cliente', icon: Smartphone, moduleKey: 'customers' }
       ]
     },
     {
@@ -114,18 +140,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
           badge: 'IA',
           badgeTone: 'blue',
           badgeTitle: 'Asistente con respuestas automáticas',
-          requiredPermission: 'reports.operational'
+          requiredPermission: 'reports.operational',
+          moduleKey: 'assistant'
         },
-        { id: 'configuracion', label: 'Configuración', icon: Settings, requiredPermission: 'settings.manage' }
+        { id: 'configuracion', label: 'Configuración', icon: Settings, requiredPermission: 'settings.manage', moduleKey: 'settings' }
       ]
     }
   ];
 
-  // Filtrar módulos visibles según los permisos del usuario activo
+  // Filtrar módulos visibles según los permisos del usuario activo y el estado activo del módulo
   const groups = rawGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => !item.requiredPermission || hasPermission(item.requiredPermission))
+      items: group.items.filter(
+        (item) =>
+          (!item.requiredPermission || hasPermission(item.requiredPermission)) &&
+          (!item.moduleKey || isModuleActive(item.moduleKey))
+      )
     }))
     .filter((group) => group.items.length > 0);
 
@@ -267,6 +298,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onSelect, isMobile }) => {
                   </button>
                 );
               })}
+            </div>
+            <div className="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-400 leading-tight px-1">
+              El rol <span className="font-semibold text-slate-600">Súper Administrador</span> operará en la consola interna separada de CODIA.
             </div>
           </div>
         )}

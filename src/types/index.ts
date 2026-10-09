@@ -2,6 +2,21 @@ export type Role = 'administrador' | 'barista' | 'cajero' | 'cocina' | 'encargad
 
 export type UserRole = 'superadmin' | 'administrador' | 'encargado' | 'empleado' | 'cliente';
 
+export type OperativeRole = 'administrador' | 'encargado' | 'empleado' | 'cliente';
+export const OPERATIVE_ROLES: OperativeRole[] = ['administrador', 'encargado', 'empleado', 'cliente'];
+
+export type ModuleStatus = 'activo' | 'inactivo' | 'simulado' | 'planeado';
+
+export interface ModuleTechnicalInfo {
+  key: string;
+  name: string;
+  version: string;
+  status: ModuleStatus;
+  dependencies: string[];
+  description: string;
+  category: 'core' | 'operativo' | 'administrativo' | 'simulado' | 'planeado';
+}
+
 export type Permission =
   | 'sales.create'
   | 'sales.view_own'

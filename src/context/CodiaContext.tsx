@@ -48,7 +48,7 @@ import {
 import { quoteSale } from '../lib/promotions';
 import { findShortages, requiredIngredients } from '../lib/inventory';
 
-export const demoUsers: ActiveUser[] = [
+export const allDemoUsers: ActiveUser[] = [
   {
     id: 'usr-admin',
     name: 'Laura Méndez',
@@ -94,6 +94,12 @@ export const demoUsers: ActiveUser[] = [
     branchId: 'branch-main'
   }
 ];
+
+export const operativeDemoUsers: ActiveUser[] = allDemoUsers.filter(
+  (u) => u.role !== 'superadmin'
+);
+
+export const demoUsers: ActiveUser[] = operativeDemoUsers;
 
 interface CodiaContextType {
   config: SystemConfig;
@@ -365,7 +371,12 @@ export const CodiaProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const switchRole = (role: UserRole) => {
-    const targetUser = demoUsers.find((u) => u.role === role) || {
+    if (role === 'superadmin') {
+      showToast('El rol Súper Administrador está reservado para la consola interna de CODIA y no opera dentro de la app de cafetería.');
+      return;
+    }
+
+    const targetUser = allDemoUsers.find((u) => u.role === role) || {
       id: `usr-${role}`,
       name: `Usuario ${role}`,
       email: `${role}@codia.com`,

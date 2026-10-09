@@ -99,6 +99,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
                   );
                 })}
               </div>
+              <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 leading-tight">
+                El perfil <span className="font-semibold text-slate-600 dark:text-slate-300">Súper Administrador</span> operará en la consola interna separada de CODIA.
+              </div>
             </div>
           )}
         </div>
