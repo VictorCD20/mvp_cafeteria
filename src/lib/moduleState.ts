@@ -220,3 +220,54 @@ export const canToggleModule = (
     return { canToggle: true, newStatus };
   }
 };
+
+export const MODULE_STORAGE_KEY = 'codia-demo-modules-demo-cafeteria-v1';
+
+export interface StoredModuleState {
+  version: '1.0';
+  cafeteriaId: string;
+  timestamp: number;
+  statuses: Record<string, ModuleStatus>;
+}
+
+export const serializeModuleStatuses = (
+  modules: Record<string, ModuleTechnicalInfo>,
+  cafeteriaId: string = 'demo-cafeteria'
+): string => {
+  const statuses: Record<string, ModuleStatus> = {};
+  for (const [key, mod] of Object.entries(modules)) {
+    statuses[key] = mod.status;
+  }
+  const payload: StoredModuleState = {
+    version: '1.0',
+    cafeteriaId,
+    timestamp: Date.now(),
+    statuses
+  };
+  return JSON.stringify(payload);
+};
+
+export const parseStoredModuleStatuses = (
+  rawJson: string | null,
+  defaultModules: Record<string, ModuleTechnicalInfo> = INITIAL_MODULES
+): Record<string, ModuleTechnicalInfo> => {
+  if (!rawJson) return defaultModules;
+  try {
+    const parsed: StoredModuleState = JSON.parse(rawJson);
+    if (!parsed || parsed.version !== '1.0' || !parsed.statuses || typeof parsed.statuses !== 'object') {
+      return defaultModules;
+    }
+    const result: Record<string, ModuleTechnicalInfo> = { ...defaultModules };
+    for (const [key, status] of Object.entries(parsed.statuses)) {
+      if (result[key] && ['activo', 'inactivo', 'simulado', 'planeado'].includes(status)) {
+        result[key] = {
+          ...result[key],
+          status
+        };
+      }
+    }
+    return result;
+  } catch {
+    return defaultModules;
+  }
+};

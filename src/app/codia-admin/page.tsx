@@ -241,17 +241,19 @@ export default function CodiaAdminPage() {
               <Layers className="w-5 h-5 text-blue-400" />
               <div>
                 <h2 className="text-sm font-bold text-white">Activación y Estado de Módulos</h2>
-                <p className="text-xs text-slate-400">Haz clic en el switch para activar o desactivar cada módulo</p>
+                <p className="text-xs text-slate-400">
+                  Configuración modular guardada localmente en este navegador. Demo sin base de datos.
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={resetModulesToDefault}
                 className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition"
-                title="Restablecer todos los módulos al estado inicial"
+                title="Eliminar la configuración guardada localmente y restaurar los estados de codia-beta.json"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Restablecer predeterminados</span>
+                <span>Restablecer configuración de módulos</span>
               </button>
               <div className="text-xs text-slate-400 font-mono bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">
                 Total: {moduleList.length} módulos

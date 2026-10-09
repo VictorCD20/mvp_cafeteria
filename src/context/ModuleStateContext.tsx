@@ -1,8 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ModuleStatus, ModuleTechnicalInfo } from '../types';
-import { INITIAL_MODULES, getActiveDependents, canToggleModule } from '../lib/moduleState';
+import {
+  INITIAL_MODULES,
+  getActiveDependents,
+  canToggleModule,
+  MODULE_STORAGE_KEY,
+  serializeModuleStatuses,
+  parseStoredModuleStatuses
+} from '../lib/moduleState';
 
 interface ModuleStateContextType {
   modules: Record<string, ModuleTechnicalInfo>;
@@ -23,6 +30,35 @@ export const ModuleStateProvider = ({ children }: { children: ReactNode }) => {
   const [lastActionMessage, setLastActionMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   const clearActionMessage = () => setLastActionMessage(null);
+
+  // Cargar estado persistido en cliente y suscribir al evento 'storage' para sincronización entre pestañas
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const saved = localStorage.getItem(MODULE_STORAGE_KEY);
+      if (saved) {
+        const parsed = parseStoredModuleStatuses(saved, INITIAL_MODULES);
+        setModules(parsed);
+      }
+    } catch (err) {
+      console.warn('No se pudo leer la configuración modular de localStorage:', err);
+    }
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === MODULE_STORAGE_KEY) {
+        const updated = parseStoredModuleStatuses(e.newValue, INITIAL_MODULES);
+        setModules(updated);
+        setLastActionMessage({
+          type: 'info',
+          text: 'Configuración modular sincronizada desde otra pestaña del navegador.'
+        });
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const isModuleActive = (moduleKey: string): boolean => {
     const mod = modules[moduleKey];
@@ -53,13 +89,24 @@ export const ModuleStateProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const target = modules[moduleKey];
-    setModules((prev) => ({
-      ...prev,
+    const updatedModules: Record<string, ModuleTechnicalInfo> = {
+      ...modules,
       [moduleKey]: {
-        ...prev[moduleKey],
+        ...modules[moduleKey],
         status: check.newStatus!
       }
-    }));
+    };
+
+    setModules(updatedModules);
+
+    // Guardar en localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(MODULE_STORAGE_KEY, serializeModuleStatuses(updatedModules));
+      } catch (err) {
+        console.warn('No se pudo guardar la configuración modular en localStorage:', err);
+      }
+    }
 
     const msg =
       check.newStatus === 'inactivo'
@@ -71,8 +118,18 @@ export const ModuleStateProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetModulesToDefault = () => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(MODULE_STORAGE_KEY);
+      } catch (err) {
+        console.warn('No se pudo limpiar localStorage:', err);
+      }
+    }
     setModules(INITIAL_MODULES);
-    setLastActionMessage({ type: 'info', text: 'Estado de módulos restablecido a la configuración base.' });
+    setLastActionMessage({
+      type: 'success',
+      text: 'Configuración modular restablecida a los valores base predeterminados.'
+    });
   };
 
   return (
